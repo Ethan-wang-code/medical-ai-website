@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Logistics AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .sidebar-item.active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-card {
+            background: rgba(30, 30, 30, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 3px;
+        }
+        
+        .chat-bubble-user {
+            background: rgba(147, 51, 234, 0.2);
+        }
+        
+        .chat-bubble-ai {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .pulse-indicator {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-[#0f0f0f] text-gray-200 min-h-screen">
+    <div class="flex h-screen">
+        <aside class="w-64 bg-[#1a1a1a] border-r border-white/5 flex flex-col">
+            <div class="p-4">
+                <button onclick="newChat()" class="w-full py-3 px-4 rounded-lg border border-white/10 hover:bg-white/5 transition-colors flex items-center gap-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span class="text-sm">New chat</span>
+                </button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto px-3 space-y-1">
+                <button onclick="switchView('chat')" id="nav-chat" class="sidebar-item active w-full text-left py-2 px-3 rounded-lg text-sm">
+                    💬 Medical Logistics AI
+                </button>
+                <button onclick="switchView('overview')" id="nav-overview" class="sidebar-item w-full text-left py-2 px-3 rounded-lg text-sm">
+                    📊 项目概览
+                </button>
+                <button onclick="switchView('training')" id="nav-training" class="sidebar-item w-full text-left py-2 px-3 rounded-lg text-sm">
+                    📈 训练数据
+                </button>
+                <button onclick="switchView('projects')" id="nav-projects" class="sidebar-item w-full text-left py-2 px-3 rounded-lg text-sm">
+                    📁 项目里程碑
+                </button>
+            </div>
+            
+            <div class="p-4 border-t border-white/5">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-sm font-medium">
+                        A
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-sm font-medium">AI Developer</div>
+                        <div class="text-xs text-gray-500">AI Product Manager</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <div id="mainContent" class="flex-1 overflow-y-auto">
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        const siteData = {
+            metrics: {
+                trainingData: 200,
+                epochs: 100,
+                finalLoss: 1.89,
+                gpuHours: 2.5,
+                accuracy: 92.5,
+                inferenceTime: 1.2
+            },
+            projects: [
+                {
+                    id: 1,
+                    title: "智能医疗物流助手",
+                    description: "基于Qwen2.5-7B-Instruct大模型，经过LoRA微调训练，专门用于医疗物流产品咨询与售后服务的智能助手。训练了200+条专业数据，100个epoch，最终Loss降至1.89。",
+                    keywords: ["大模型", "LoRA", "Qwen", "医疗物流", "SFT"],
+                    status: "已上线"
+                },
+                {
+                    id: 2,
+                    title: "医院物流系统知识库",
+                    description: "构建了包含200+条专业问答的医疗物流知识库，覆盖轨道物流、箱式物流、气动物流、物流机器人等产品的介绍、优势、售后等内容。",
+                    keywords: ["知识库", "数据标注", "自然语言处理"],
+                    status: "已完成"
+                },
+                {
+                    id: 3,
+                    title: "模型训练可视化平台",
+                    description: "实时监控和可视化大模型训练过程，包括Loss曲线、学习率调度、GPU利用率等关键指标，帮助优化训练策略。",
+                    keywords: ["可视化", "训练监控", "Matplotlib"],
+                    status: "开发中"
+                }
+            ],
+            trainingCurve: {
+                epochs: [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+                loss: [3.708, 3.521, 3.210, 2.987, 2.765, 2.543, 2.321, 2.100, 1.987, 1.923, 1.890],
+                learningRate: [5e-5, 4.8e-5, 4.2e-5, 3.5e-5, 2.8e-5, 2.1e-5, 1.5e-5, 1.0e-5, 6e-6, 3e-6, 1e-7]
+            },
+            chatResponses: {
+                "产品": "我们的核心产品包括：中型轨道物流传输系统、箱式物流传输系统、气动物流传输系统、物流机器人、垃圾污被服收集处理系统等，提供智慧物流全场景解决方案。轨道系统载重15kg，速度0.1-1m/s；箱式系统载重30-50kg，适合大件运输；气动系统速度5-8m/s，快速传输小件；机器人采用SLAM导航，无需改造环境。",
+                "有哪些产品": "我们的核心产品包括：中型轨道物流传输系统、箱式物流传输系统、气动物流传输系统、物流机器人、垃圾污被服收集处理系统等，提供智慧物流全场景解决方案。轨道系统载重15kg，速度0.1-1m/s；箱式系统载重30-50kg，适合大件运输；气动系统速度5-8m/s，快速传输小件；机器人采用SLAM导航，无需改造环境。",
+                "轨道物流": "中型轨道物流传输系统以收发工作站、传输小车、轨道、换轨器、控制软件等为核心，传输速度0.1-1m/s，载重可达15kg，适合输送输液袋、药品、耗材、检验标本、病历档案等。系统采用不锈钢材质，使用寿命长达20年以上，已服务超过500家医院，日均传输量可达10000次以上。",
+                "箱式物流": "箱式物流传输系统具有载重量大、复用率高的特点，载重可达30-50kg，周转箱可循环使用，适合输送输液包、手术包、餐食、被服等大件物品。系统设计容量为每小时500箱，可根据医院规模灵活配置，能耗比传统方式降低60%，占地节省40%。",
+                "气动物流": "气动物流传输系统速度快，传输速度可达5-8m/s，适合快速传输检验标本、紧急药品、血液制品等小件物品。管道采用不锈钢材质，直径110mm，单次传输时间仅需10-30秒，是急诊、ICU等科室的理想选择，已累计完成超过1000万次安全传输。",
+                "物流机器人": "物流机器人采用自然导航SLAM技术，无需改造医院环境，灵活调度，适合平疫结合的运输场景。单台机器人载重可达100kg，续航8小时，充电2小时，支持多机器人协同调度，效率提升300%，已在200+医院投入使用。",
+                "优势": "我们产品的核心优势包括：国家高新技术企业、专精特新企业、300+项知识产权、20年+使用寿命、全程数字化可追溯、平疫结合无人化运输、定制化解决方案。已服务500+医院，覆盖30个省份，市场占有率领先，日均处理物流量超过100万次。",
+                "技术优势": "我们产品的核心优势包括：国家高新技术企业、专精特新企业、300+项知识产权、20年+使用寿命、全程数字化可追溯、平疫结合无人化运输、定制化解决方案。已服务500+医院，覆盖30个省份，市场占有率领先，日均处理物流量超过100万次。",
+                "使用寿命": "我们的管道及投放门采用304不锈钢材质，使用寿命长达20年以上，适配医院每日高频次、高负荷使用场景。系统设计标准为每日20000次传输，经过1000万次循环测试，核心部件寿命可达25年，提供长期稳定的服务保障。",
+                "售后服务": "我们提供完善的售后服务体系，包括专业的安装调试、定期维护保养、快速响应的故障维修、系统升级优化、操作培训等全流程服务。全国设有30+服务中心，24小时热线，4小时现场响应，定期巡检，终身技术支持，确保系统稳定运行。",
+                "定制": "是的，我们深刻理解医院的临床流程与管理需求，能提供最贴合实际的专业定制化解决方案，根据不同医院的实际情况量身打造智能物流系统。拥有100+定制案例，支持模块化配置，灵活扩展，适配新旧院区改造，提供从规划到实施的全流程服务。",
+                "你好": "你好！我是智能医疗物流助手，可以为你介绍我们的智能物流系统、产品优势、售后服务等内容。我们提供轨道物流、箱式物流、气动物流、物流机器人等全场景解决方案，已服务500+医院。请问有什么可以帮你的吗？",
+                "您好": "你好！我是智能医疗物流助手，可以为你介绍我们的智能物流系统、产品优势、售后服务等内容。我们提供轨道物流、箱式物流、气动物流、物流机器人等全场景解决方案，已服务500+医院。请问有什么可以帮你的吗？"
+            },
+            quickQuestions: [
+                "有哪些产品？",
+                "技术优势是什么？",
+                "轨道物流介绍",
+                "物流机器人特点",
+                "售后服务内容"
+            ]
+        };
+
+        let currentView = 'chat';
+        let chart = null;
+        let chatHistory = [];
+
+        function newChat() {
+            chatHistory = [];
+            switchView('chat');
+        }
+
+        function renderChatView() {
+            if (chatHistory.length === 0) {
+                return `
+                    <div class="h-full flex flex-col">
+                        <div class="flex-1 flex flex-col items-center justify-center p-8 fade-in">
+                            <div class="text-center mb-8">
+                                <div class="text-6xl mb-6">✨</div>
+                                <h1 class="text-3xl font-light mb-2">Medical Logistics AI</h1>
+                                <p class="text-gray-400">智能医疗物流助手 · 产品经理视角</p>
+                            </div>
+                            
+                            <div class="grid md:grid-cols-3 gap-4 max-w-4xl w-full">
+                                ${siteData.quickQuestions.map((q) => `
+                                    <button onclick="quickAsk('${q}')" class="glass-card p-4 rounded-xl text-left hover:bg-white/10 transition-colors">
+                                        <div class="text-sm text-gray-300">${q}</div>
+                                    </button>
+                                `).join('')}
+                            </div>
+                            
+                            <div class="mt-8 glass-card p-4 rounded-xl max-w-2xl w-full">
+                                <div class="flex items-start gap-3">
+                                    <span class="text-yellow-500">⚠️</span>
+                                    <div class="text-xs text-gray-400">
+                                        <strong>免责声明：</strong>本项目为教学演示目的，所有数据为模拟数据，仅供学习交流使用，不构成任何商业建议。训练数据来自公开信息整理，如有侵权请联系删除。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6">
+                            <div class="max-w-3xl mx-auto">
+                                <div class="glass-card rounded-2xl p-2">
+                                    <div class="flex items-end gap-3">
+                                        <textarea
+                                            id="chatInput"
+                                            placeholder="发送消息..."
+                                            class="flex-1 bg-transparent outline-none resize-none text-sm max-h-48 py-3 px-4"
+                                            rows="1"
+                                            onkeydown="handleKeyDown(event)"
+                                            oninput="autoResize(this)"
+                                        ></textarea>
+                                        <button onclick="sendMessage()" class="p-3 rounded-xl bg-purple-600 hover:bg-purple-500 transition-colors">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-500 text-center mt-3">
+                                    Medical Logistics AI can make mistakes. Please verify important info.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="h-full flex flex-col">
+                        <div id="chatMessages" class="flex-1 overflow-y-auto p-6 scrollbar-thin">
+                            <div class="max-w-3xl mx-auto space-y-6">
+                                ${chatHistory.map((msg, idx) => `
+                                    <div class="flex gap-4 ${msg.role === 'user' ? 'justify-end' : ''} fade-in">
+                                        ${msg.role === 'assistant' ? `
+                                            <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0 text-sm">
+                                                A
+                                            </div>
+                                        ` : ''}
+                                        <div class="${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'} rounded-xl p-4 max-w-[80%]">
+                                            <p class="text-sm whitespace-pre-wrap">${msg.content}</p>
+                                        </div>
+                                        ${msg.role === 'user' ? `
+                                            <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0 text-sm">
+                                                我
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="p-6 border-t border-white/5">
+                            <div class="max-w-3xl mx-auto">
+                                <div class="glass-card rounded-2xl p-2">
+                                    <div class="flex items-end gap-3">
+                                        <textarea
+                                            id="chatInput"
+                                            placeholder="发送消息..."
+                                            class="flex-1 bg-transparent outline-none resize-none text-sm max-h-48 py-3 px-4"
+                                            rows="1"
+                                            onkeydown="handleKeyDown(event)"
+                                            oninput="autoResize(this)"
+                                        ></textarea>
+                                        <button onclick="sendMessage()" class="p-3 rounded-xl bg-purple-600 hover:bg-purple-500 transition-colors">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderOverviewView() {
+            return `
+                <div class="p-8 max-w-5xl mx-auto fade-in">
+                    <h1 class="text-3xl font-light mb-2">项目概览</h1>
+                    <p class="text-gray-400 mb-8">从0到1打造医疗物流AI助手</p>
+                    
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                        <div class="glass-card p-6 rounded-xl hover:bg-white/5 transition-colors">
+                            <div class="text-4xl font-light mb-2">${siteData.metrics.trainingData}</div>
+                            <div class="text-sm text-gray-400">训练数据</div>
+                        </div>
+                        <div class="glass-card p-6 rounded-xl hover:bg-white/5 transition-colors">
+                            <div class="text-4xl font-light mb-2">${siteData.metrics.epochs}</div>
+                            <div class="text-sm text-gray-400">训练轮次</div>
+                        </div>
+                        <div class="glass-card p-6 rounded-xl hover:bg-white/5 transition-colors">
+                            <div class="text-4xl font-light mb-2">${siteData.metrics.finalLoss}</div>
+                            <div class="text-sm text-gray-400">最终 Loss</div>
+                        </div>
+                        <div class="glass-card p-6 rounded-xl hover:bg-white/5 transition-colors">
+                            <div class="text-4xl font-light mb-2">${siteData.metrics.gpuHours}</div>
+                            <div class="text-sm text-gray-400">GPU 小时</div>
+                        </div>
+                        <div class="glass-card p-6 rounded-xl hover:bg-white/5 transition-colors">
+                            <div class="text-4xl font-light mb-2">${siteData.metrics.accuracy}%</div>
+                            <div class="text-sm text-gray-400">准确率</div>
+                        </div>
+                        <div class="glass-card p-6 rounded-xl hover:bg-white/5 transition-colors">
+                            <div class="text-4xl font-light mb-2">${siteData.metrics.inferenceTime}s</div>
+                            <div class="text-sm text-gray-400">推理时间</div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-card p-6 rounded-xl mb-6">
+                        <h2 class="text-lg font-medium mb-4">项目状态</h2>
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-2 h-2 bg-green-500 rounded-full pulse-indicator"></div>
+                            <span class="text-green-400 text-sm">已上线</span>
+                        </div>
+                        <p class="text-gray-400 text-sm">
+                            基于Qwen2.5-7B-Instruct大模型，经过LoRA微调训练，专门用于医疗物流产品咨询与售后服务的智能助手。
+                        </p>
+                    </div>
+                    
+                    <div class="glass-card p-6 rounded-xl border-yellow-500/20">
+                        <div class="flex items-start gap-3">
+                            <span class="text-yellow-500 text-xl">⚠️</span>
+                            <div>
+                                <h3 class="text-sm font-medium text-yellow-400 mb-2">免责声明</h3>
+                                <p class="text-xs text-gray-400">
+                                    本项目为教学演示目的，所有数据为模拟数据，仅供学习交流使用，不构成任何商业建议。训练数据来自公开信息整理，如有侵权请联系删除。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTrainingView() {
+            return `
+                <div class="p-8 max-w-5xl mx-auto fade-in">
+                    <h1 class="text-3xl font-light mb-2">训练数据</h1>
+                    <p class="text-gray-400 mb-8">Loss曲线与学习率调度</p>
+                    
+                    <div class="glass-card p-6 rounded-xl mb-8">
+                        <div class="h-80">
+                            <canvas id="lossChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="glass-card p-6 rounded-xl">
+                            <h3 class="text-sm font-medium mb-4 text-gray-300">模型架构</h3>
+                            <div class="space-y-3 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">基座模型</span>
+                                    <span>Qwen2.5-7B-Instruct</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">微调方式</span>
+                                    <span>LoRA</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Rank</span>
+                                    <span>8</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Alpha</span>
+                                    <span>16</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="glass-card p-6 rounded-xl">
+                            <h3 class="text-sm font-medium mb-4 text-gray-300">训练配置</h3>
+                            <div class="space-y-3 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Batch Size</span>
+                                    <span>4</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">梯度累积</span>
+                                    <span>4</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">学习率</span>
+                                    <span>5e-5</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">优化器</span>
+                                    <span>AdamW</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="glass-card p-6 rounded-xl">
+                            <h3 class="text-sm font-medium mb-4 text-gray-300">数据分布</h3>
+                            <div class="space-y-3 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">产品介绍</span>
+                                    <span>60条</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">技术优势</span>
+                                    <span>50条</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">售后服务</span>
+                                    <span>45条</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">其他</span>
+                                    <span>45条</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProjectsView() {
+            return `
+                <div class="p-8 max-w-5xl mx-auto fade-in">
+                    <h1 class="text-3xl font-light mb-2">项目里程碑</h1>
+                    <p class="text-gray-400 mb-8">产品经理视角的项目演进</p>
+                    
+                    <div class="space-y-4">
+                        ${siteData.projects.map((project) => `
+                            <div class="glass-card p-6 rounded-xl">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div>
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <h3 class="text-lg font-medium">${project.title}</h3>
+                                            <span class="px-2 py-1 text-xs rounded-full ${
+                                                project.status === '已上线' ? 'bg-green-500/20 text-green-400' :
+                                                project.status === '已完成' ? 'bg-blue-500/20 text-blue-400' :
+                                                'bg-yellow-500/20 text-yellow-400'
+                                            }">
+                                                ${project.status}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-gray-400 text-sm mb-4">${project.description}</p>
+                                <div class="flex flex-wrap gap-2">
+                                    ${project.keywords.map(kw => `
+                                        <span class="px-2 py-1 text-xs rounded-full bg-white/5 text-gray-400">
+                                            ${kw}
+                                        </span>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function switchView(view) {
+            currentView = view;
+            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+            document.getElementById('nav-' + view).classList.add('active');
+            
+            const mainContent = document.getElementById('mainContent');
+            
+            switch(view) {
+                case 'chat':
+                    mainContent.innerHTML = renderChatView();
+                    break;
+                case 'overview':
+                    mainContent.innerHTML = renderOverviewView();
+                    break;
+                case 'training':
+                    mainContent.innerHTML = renderTrainingView();
+                    setTimeout(() => initChart(), 100);
+                    break;
+                case 'projects':
+                    mainContent.innerHTML = renderProjectsView();
+                    break;
+            }
+        }
+
+        function quickAsk(question) {
+            switchView('chat');
+            setTimeout(() => {
+                const input = document.getElementById('chatInput');
+                if (input) {
+                    input.value = question;
+                    sendMessage();
+                }
+            }, 100);
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            if (!input) return;
+            
+            const message = input.value.trim();
+            if (!message) return;
+            
+            chatHistory.push({ role: 'user', content: message });
+            chatHistory.push({ role: 'assistant', content: '', isTyping: true });
+            
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = renderChatView();
+            
+            setTimeout(() => {
+                let response = "感谢你的提问！我可以为你介绍我们的智能物流产品、技术优势和售后服务。试试问：有哪些产品？技术优势是什么？";
+                let maxMatchLength = 0;
+                let bestMatch = null;
+                
+                for (const key in siteData.chatResponses) {
+                    if (message.includes(key) && key.length > maxMatchLength) {
+                        maxMatchLength = key.length;
+                        bestMatch = key;
+                    }
+                }
+                
+                if (bestMatch) {
+                    response = siteData.chatResponses[bestMatch];
+                }
+                
+                chatHistory[chatHistory.length - 1] = { role: 'assistant', content: response };
+                mainContent.innerHTML = renderChatView();
+                
+                const chatMessages = document.getElementById('chatMessages');
+                if (chatMessages) {
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+            }, 1000);
+        }
+
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 192) + 'px';
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('lossChart');
+            if (!ctx) return;
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: siteData.trainingCurve.epochs,
+                    datasets: [
+                        {
+                            label: 'Loss',
+                            data: siteData.trainingCurve.loss,
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Learning Rate (e-5)',
+                            data: siteData.trainingCurve.learningRate.map(lr => lr * 1e5),
+                            borderColor: '#22c55e',
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.6)'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Epoch',
+                                color: 'rgba(255, 255, 255, 0.5)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.4)'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Loss',
+                                color: '#8b5cf6'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.4)'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Learning Rate (e-5)',
+                                color: '#22c55e'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.4)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('mainContent').innerHTML = renderChatView();
+        });
+    </script>
+</body>
+</html>
