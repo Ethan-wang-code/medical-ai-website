@@ -6,150 +6,496 @@
     <title>Medical Logistics AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
     <style>
         * {
-            font-family: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Roboto', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            box-sizing: border-box;
         }
         
-        .sidebar-item:hover {
-            background: rgba(255, 255, 255, 0.05);
+        :root {
+            /* Google Material Design 3 Colors */
+            --md3-primary: #1A73E8;
+            --md3-primary-light: #4285F4;
+            --md3-primary-dark: #0D47A1;
+            --md3-surface: #FFFFFF;
+            --md3-surface-variant: #F2F2F2;
+            --md3-background: #F8F9FA;
+            --md3-on-surface: #202124;
+            --md3-on-surface-variant: #5F6368;
+            --md3-outline: #DADCE0;
+            --md3-outline-variant: #E8EAED;
+            --md3-error: #EA4335;
+            --md3-success: #34A853;
+            --md3-warning: #FBBC05;
+            
+            /* Elevation Shadows */
+            --md3-elevation-1: 0 1px 3px rgba(60, 64, 67, 0.1), 0 1px 2px rgba(60, 64, 67, 0.06);
+            --md3-elevation-2: 0 2px 4px rgba(60, 64, 67, 0.1), 0 1px 2px rgba(60, 64, 67, 0.08);
+            --md3-elevation-3: 0 4px 6px rgba(60, 64, 67, 0.1), 0 2px 4px rgba(60, 64, 67, 0.08);
+            --md3-elevation-4: 0 8px 10px rgba(60, 64, 67, 0.1), 0 4px 6px rgba(60, 64, 67, 0.1);
+            --md3-elevation-5: 0 12px 16px rgba(60, 64, 67, 0.1), 0 6px 8px rgba(60, 64, 67, 0.1);
         }
         
-        .sidebar-item.active {
-            background: rgba(255, 255, 255, 0.1);
+        body {
+            background-color: var(--md3-background);
+            color: var(--md3-on-surface);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            line-height: 1.5;
         }
         
-        .glass-card {
-            background: rgba(30, 30, 30, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--md3-surface);
+            border-right: 1px solid var(--md3-outline-variant);
+            width: 280px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: transform 0.3s ease;
         }
         
-        .scrollbar-thin::-webkit-scrollbar {
-            width: 6px;
+        .sidebar-header {
+            padding: 24px 20px 16px;
+            border-bottom: 1px solid var(--md3-outline-variant);
         }
         
-        .scrollbar-thin::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.03);
+        .logo {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--md3-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
-        .scrollbar-thin::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 3px;
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 12px;
+        }
+        
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--md3-outline-variant);
+        }
+        
+        /* Navigation Items */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--md3-on-surface-variant);
+            text-decoration: none;
+            margin-bottom: 4px;
+        }
+        
+        .nav-item:hover {
+            background-color: rgba(26, 115, 232, 0.08);
+            color: var(--md3-primary);
+        }
+        
+        .nav-item.active {
+            background-color: rgba(26, 115, 232, 0.12);
+            color: var(--md3-primary);
+        }
+        
+        .nav-item .material-symbols-rounded {
+            font-size: 20px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Cards */
+        .md3-card {
+            background-color: var(--md3-surface);
+            border-radius: 16px;
+            box-shadow: var(--md3-elevation-1);
+            padding: 24px;
+            transition: box-shadow 0.2s ease;
+        }
+        
+        .md3-card:hover {
+            box-shadow: var(--md3-elevation-2);
+        }
+        
+        /* Buttons */
+        .md3-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 9999px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            border: none;
+            outline: none;
+        }
+        
+        .md3-btn-primary {
+            background-color: var(--md3-primary);
+            color: white;
+        }
+        
+        .md3-btn-primary:hover {
+            background-color: var(--md3-primary-light);
+            box-shadow: var(--md3-elevation-2);
+        }
+        
+        .md3-btn-secondary {
+            background-color: var(--md3-surface-variant);
+            color: var(--md3-on-surface);
+        }
+        
+        .md3-btn-secondary:hover {
+            background-color: rgba(60, 64, 67, 0.08);
+        }
+        
+        .md3-btn-outline {
+            background-color: transparent;
+            color: var(--md3-on-surface-variant);
+            border: 1px solid var(--md3-outline);
+        }
+        
+        .md3-btn-outline:hover {
+            background-color: rgba(60, 64, 67, 0.04);
+            border-color: var(--md3-outline-variant);
+        }
+        
+        /* Input Fields */
+        .md3-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--md3-outline);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background-color: var(--md3-surface);
+            color: var(--md3-on-surface);
+        }
+        
+        .md3-input:focus {
+            outline: none;
+            border-color: var(--md3-primary);
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+        }
+        
+        /* Chat Bubbles */
+        .chat-bubble {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            margin-bottom: 12px;
+            animation: fadeIn 0.3s ease;
         }
         
         .chat-bubble-user {
-            background: rgba(147, 51, 234, 0.2);
+            background-color: var(--md3-primary);
+            color: white;
+            border-radius: 18px 4px 18px 18px;
+            align-self: flex-end;
         }
         
         .chat-bubble-ai {
-            background: rgba(255, 255, 255, 0.05);
+            background-color: var(--md3-surface);
+            color: var(--md3-on-surface);
+            border: 1px solid var(--md3-outline-variant);
+            border-radius: 4px 18px 18px 18px;
+            align-self: flex-start;
         }
         
-        .pulse-indicator {
-            animation: pulse 2s infinite;
+        /* Typography */
+        .display-large {
+            font-size: 32px;
+            font-weight: 300;
+            line-height: 40px;
         }
         
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        .display-medium {
+            font-size: 28px;
+            font-weight: 400;
+            line-height: 36px;
         }
         
-        .fade-in {
-            animation: fadeIn 0.3s ease-in;
+        .display-small {
+            font-size: 24px;
+            font-weight: 400;
+            line-height: 32px;
+        }
+        
+        .headline-large {
+            font-size: 20px;
+            font-weight: 400;
+            line-height: 28px;
+        }
+        
+        .headline-medium {
+            font-size: 18px;
+            font-weight: 500;
+            line-height: 24px;
+        }
+        
+        .headline-small {
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 24px;
+        }
+        
+        .body-large {
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 24px;
+        }
+        
+        .body-medium {
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 20px;
+        }
+        
+        .body-small {
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 16px;
+        }
+        
+        .label-large {
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .label-medium {
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .label-small {
+            font-size: 11px;
+            font-weight: 500;
+            line-height: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Ripple Effect */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            transform: scale(0);
+            animation: ripple-animation 0.6s linear;
+            pointer-events: none;
+        }
+        
+        @keyframes ripple-animation {
+            to { transform: scale(4); opacity: 0; }
         }
         
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        
+        /* Scrollbar */
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: var(--md3-surface-variant);
+            border-radius: 3px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: var(--md3-outline);
+            border-radius: 3px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: var(--md3-outline-variant);
+        }
+        
+        /* Badge */
+        .md3-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .md3-badge-success {
+            background-color: rgba(52, 168, 83, 0.1);
+            color: var(--md3-success);
+        }
+        
+        .md3-badge-warning {
+            background-color: rgba(251, 188, 5, 0.1);
+            color: var(--md3-warning);
+        }
+        
+        .md3-badge-info {
+            background-color: rgba(26, 115, 232, 0.1);
+            color: var(--md3-primary);
+        }
+        
+        /* Quick Action Cards */
+        .quick-action-card {
+            background-color: var(--md3-surface);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--md3-elevation-1);
+        }
+        
+        .quick-action-card:hover {
+            box-shadow: var(--md3-elevation-2);
+            transform: translateY(-2px);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
     </style>
 </head>
-<body class="bg-[#0f0f0f] text-gray-200 min-h-screen">
-    <div class="flex h-screen">
-        <aside class="w-64 bg-[#1a1a1a] border-r border-white/5 flex flex-col">
-            <div class="p-4">
-                <button onclick="newChat()" class="w-full py-3 px-4 rounded-lg border border-white/10 hover:bg-white/5 transition-colors flex items-center gap-3">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    <span class="text-sm">New chat</span>
-                </button>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="material-symbols-rounded">medical_services</span>
+                <span>Medical Logistics AI</span>
             </div>
+        </div>
+        
+        <div class="sidebar-content scrollbar-thin">
+            <button onclick="newChat()" class="md3-btn md3-btn-outline w-full mb-8">
+                <span class="material-symbols-rounded">add</span>
+                <span>New chat</span>
+            </button>
             
-            <div class="flex-1 overflow-y-auto px-3 space-y-1">
-                <button onclick="switchView('chat')" id="nav-chat" class="sidebar-item active w-full text-left py-2 px-3 rounded-lg text-sm">
-                    💬 Medical Logistics AI
+            <nav>
+                <button onclick="switchView('chat')" id="nav-chat" class="nav-item active">
+                    <span class="material-symbols-rounded">chat</span>
+                    <span class="body-medium">Chat</span>
                 </button>
-                <button onclick="switchView('overview')" id="nav-overview" class="sidebar-item w-full text-left py-2 px-3 rounded-lg text-sm">
-                    📊 项目概览
+                <button onclick="switchView('overview')" id="nav-overview" class="nav-item">
+                    <span class="material-symbols-rounded">dashboard</span>
+                    <span class="body-medium">Overview</span>
                 </button>
-                <button onclick="switchView('training')" id="nav-training" class="sidebar-item w-full text-left py-2 px-3 rounded-lg text-sm">
-                    📈 训练数据
+                <button onclick="switchView('training')" id="nav-training" class="nav-item">
+                    <span class="material-symbols-rounded">show_chart</span>
+                    <span class="body-medium">Training</span>
                 </button>
-                <button onclick="switchView('projects')" id="nav-projects" class="sidebar-item w-full text-left py-2 px-3 rounded-lg text-sm">
-                    📁 项目里程碑
+                <button onclick="switchView('projects')" id="nav-projects" class="nav-item">
+                    <span class="material-symbols-rounded">folder</span>
+                    <span class="body-medium">Projects</span>
                 </button>
-            </div>
+            </nav>
+        </div>
+        
+        <div class="sidebar-footer">
+            <button id="modelModeBtn" onclick="toggleModelMode()" class="md3-btn md3-btn-outline w-full mb-6">
+                <span class="material-symbols-rounded">radio_button_unchecked</span>
+                <span>Demo Mode</span>
+            </button>
             
-            <div class="p-4 border-t border-white/5">
-                <button id="modelModeBtn" onclick="toggleModelMode()" class="w-full py-2 px-3 rounded-lg border border-white/10 hover:bg-white/5 transition-colors text-sm mb-3" title="点击切换到真实模型（需要模型已上传到Hugging Face）">
-                    🟡 演示模式
-                </button>
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-sm font-medium">
-                        A
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-sm font-medium">AI Developer</div>
-                        <div class="text-xs text-gray-500">AI Product Manager</div>
-                    </div>
+            <div class="flex items-center gap-3 p-3 rounded-12 bg-md3-surface-variant">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-full flex items-center justify-center text-white font-medium">
+                    ML
+                </div>
+                <div>
+                    <div class="body-medium font-medium">AI Developer</div>
+                    <div class="body-small text-md3-on-surface-variant">Product Manager</div>
                 </div>
             </div>
-        </aside>
-        
-        <main class="flex-1 flex flex-col overflow-hidden">
-            <div id="mainContent" class="flex-1 overflow-y-auto">
-            </div>
-        </main>
-    </div>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <div id="mainContent" class="flex-1 p-8">
+            <!-- Content will be rendered here -->
+        </div>
+    </main>
     
     <script>
         const siteData = {
             config: {
                 useRealModel: false,
-                huggingFaceSpace: 'https://Ethan-Lab-medical-logistics-ai.hf.space',
+                modelScopeSpace: 'https://www.modelscope.cn/studios/Ethanspace/medical-logistics-ai',
+                modelScopeApi: 'https://www.modelscope.cn/api/v1/studios/Ethanspace/medical-logistics-ai/gradio',
                 systemPrompt: '你是智能医疗物流助手，可以为用户介绍智能物流系统、产品优势、售后服务等内容。'
             },
             metrics: {
-                trainingData: 200,
+                trainingData: 300,
                 epochs: 100,
                 finalLoss: 1.89,
-                gpuHours: 2.5,
+                gpuHours: 1.5,
                 accuracy: 92.5,
-                inferenceTime: 1.2
+                inferenceTime: 0.8
             },
             projects: [
                 {
                     id: 1,
-                    title: "智能医疗物流助手",
-                    description: "基于Qwen2.5-7B-Instruct大模型，经过LoRA微调训练，专门用于医疗物流产品咨询与售后服务的智能助手。训练了200+条专业数据，100个epoch，最终Loss降至1.89。",
-                    keywords: ["大模型", "LoRA", "Qwen", "医疗物流", "SFT"],
+                    title: "Medical Logistics AI Assistant",
+                    description: "基于Qwen2.5-0.5B-Instruct大模型，经过LoRA微调训练，专门用于医疗物流产品咨询与售后服务的智能助手。训练了300+条专业数据，100个epoch，最终Loss降至1.89。部署在ModelScope平台，免费对外提供服务。",
+                    keywords: ["Large Model", "LoRA", "Qwen", "Medical Logistics", "SFT", "ModelScope"],
                     status: "已上线"
                 },
                 {
                     id: 2,
-                    title: "医院物流系统知识库",
-                    description: "构建了包含200+条专业问答的医疗物流知识库，覆盖轨道物流、箱式物流、气动物流、物流机器人等产品的介绍、优势、售后等内容。",
-                    keywords: ["知识库", "数据标注", "自然语言处理"],
+                    title: "Hospital Logistics Knowledge Base",
+                    description: "构建了包含300+条专业问答的医疗物流知识库，覆盖轨道物流、箱式物流、气动物流、物流机器人等产品的介绍、优势、售后等内容。数据经过清洗，移除品牌信息，确保合规使用。",
+                    keywords: ["Knowledge Base", "Data Annotation", "NLP", "Data Cleaning"],
                     status: "已完成"
                 },
                 {
                     id: 3,
-                    title: "模型训练可视化平台",
+                    title: "Model Training Visualization",
                     description: "实时监控和可视化大模型训练过程，包括Loss曲线、学习率调度、GPU利用率等关键指标，帮助优化训练策略。",
-                    keywords: ["可视化", "训练监控", "Matplotlib"],
+                    keywords: ["Visualization", "Training Monitoring", "Matplotlib"],
                     status: "开发中"
                 }
             ],
@@ -191,56 +537,77 @@
             switchView('chat');
         }
 
+        function addRippleEffect(e) {
+            const button = e.currentTarget;
+            const ripple = document.createElement('span');
+            const rect = button.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.classList.add('ripple');
+            
+            button.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        }
+
         function renderChatView() {
             if (chatHistory.length === 0) {
                 return `
-                    <div class="h-full flex flex-col">
-                        <div class="flex-1 flex flex-col items-center justify-center p-8 fade-in">
-                            <div class="text-center mb-8">
-                                <div class="text-6xl mb-6">✨</div>
-                                <h1 class="text-3xl font-light mb-2">Medical Logistics AI</h1>
-                                <p class="text-gray-400">智能医疗物流助手 · 产品经理视角</p>
+                    <div class="h-screen flex flex-col">
+                        <div class="flex-1 flex flex-col items-center justify-center p-8">
+                            <div class="text-center mb-12">
+                                <div class="text-8xl mb-8">✨</div>
+                                <h1 class="display-medium mb-4">Medical Logistics AI</h1>
+                                <p class="body-medium text-md3-on-surface-variant">智能医疗物流助手 · Product Manager Perspective</p>
                             </div>
                             
-                            <div class="grid md:grid-cols-3 gap-4 max-w-4xl w-full">
+                            <div class="grid md:grid-cols-3 gap-6 max-w-5xl w-full mb-12">
                                 ${siteData.quickQuestions.map((q) => `
-                                    <button onclick="quickAsk('${q}')" class="glass-card p-4 rounded-xl text-left hover:bg-white/10 transition-colors">
-                                        <div class="text-sm text-gray-300">${q}</div>
-                                    </button>
+                                    <div onclick="quickAsk('${q}')" class="quick-action-card">
+                                        <div class="body-medium">${q}</div>
+                                    </div>
                                 `).join('')}
                             </div>
                             
-                            <div class="mt-8 glass-card p-4 rounded-xl max-w-2xl w-full">
-                                <div class="flex items-start gap-3">
-                                    <span class="text-yellow-500">⚠️</span>
-                                    <div class="text-xs text-gray-400">
-                                        <strong>免责声明：</strong>本项目为教学演示目的，所有数据为模拟数据，仅供学习交流使用，不构成任何商业建议。训练数据来自公开信息整理，如有侵权请联系删除。
+                            <div class="md3-card max-w-3xl w-full border-l-4 border-md3-warning">
+                                <div class="flex items-start gap-4">
+                                    <span class="material-symbols-rounded text-md3-warning">warning</span>
+                                    <div>
+                                        <h3 class="headline-small text-md3-warning mb-2">免责声明</h3>
+                                        <p class="body-small text-md3-on-surface-variant">
+                                            本项目为教学演示目的，所有数据为模拟数据，仅供学习交流使用，不构成任何商业建议。训练数据来自公开信息整理，如有侵权请联系删除。
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="p-6">
-                            <div class="max-w-3xl mx-auto">
-                                <div class="glass-card rounded-2xl p-2">
-                                    <div class="flex items-end gap-3">
+                        <div class="p-8 border-t border-md3-outline-variant">
+                            <div class="max-w-4xl mx-auto">
+                                <div class="md3-card p-4">
+                                    <div class="flex items-end gap-4">
                                         <textarea
                                             id="chatInput"
                                             placeholder="发送消息..."
-                                            class="flex-1 bg-transparent outline-none resize-none text-sm max-h-48 py-3 px-4"
+                                            class="md3-input flex-1 bg-transparent outline-none resize-none max-h-64"
                                             rows="1"
                                             onkeydown="handleKeyDown(event)"
                                             oninput="autoResize(this)"
                                         ></textarea>
-                                        <button onclick="sendMessage()" class="p-3 rounded-xl bg-purple-600 hover:bg-purple-500 transition-colors">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                            </svg>
+                                        <button onclick="sendMessage()" class="md3-btn md3-btn-primary" style="height: 44px;">
+                                            <span class="material-symbols-rounded">send</span>
                                         </button>
                                     </div>
                                 </div>
-                                <p class="text-xs text-gray-500 text-center mt-3">
-                                    Medical Logistics AI can make mistakes. Please verify important info.
+                                <p class="body-small text-md3-on-surface-variant text-center mt-4">
+                                    Medical Logistics AI can make mistakes. Please verify important information.
                                 </p>
                             </div>
                         </div>
@@ -248,21 +615,21 @@
                 `;
             } else {
                 return `
-                    <div class="h-full flex flex-col">
-                        <div id="chatMessages" class="flex-1 overflow-y-auto p-6 scrollbar-thin">
-                            <div class="max-w-3xl mx-auto space-y-6">
+                    <div class="h-screen flex flex-col">
+                        <div id="chatMessages" class="flex-1 overflow-y-auto p-8 scrollbar-thin">
+                            <div class="max-w-4xl mx-auto space-y-6">
                                 ${chatHistory.map((msg, idx) => `
-                                    <div class="flex gap-4 ${msg.role === 'user' ? 'justify-end' : ''} fade-in">
+                                    <div class="flex gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}">
                                         ${msg.role === 'assistant' ? `
-                                            <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0 text-sm">
-                                                A
+                                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-full flex items-center justify-center flex-shrink-0 text-white font-medium">
+                                                ML
                                             </div>
                                         ` : ''}
-                                        <div class="${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'} rounded-xl p-4 max-w-[80%]">
-                                            <p class="text-sm whitespace-pre-wrap">${msg.content}</p>
+                                        <div class="${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'}">
+                                            <p class="body-medium whitespace-pre-wrap">${msg.content}</p>
                                         </div>
                                         ${msg.role === 'user' ? `
-                                            <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0 text-sm">
+                                            <div class="w-10 h-10 bg-md3-surface-variant rounded-full flex items-center justify-center flex-shrink-0 font-medium text-md3-on-surface-variant">
                                                 我
                                             </div>
                                         ` : ''}
@@ -270,22 +637,20 @@
                                 `).join('')}
                             </div>
                         </div>
-                        <div class="p-6 border-t border-white/5">
-                            <div class="max-w-3xl mx-auto">
-                                <div class="glass-card rounded-2xl p-2">
-                                    <div class="flex items-end gap-3">
+                        <div class="p-8 border-t border-md3-outline-variant">
+                            <div class="max-w-4xl mx-auto">
+                                <div class="md3-card p-4">
+                                    <div class="flex items-end gap-4">
                                         <textarea
                                             id="chatInput"
                                             placeholder="发送消息..."
-                                            class="flex-1 bg-transparent outline-none resize-none text-sm max-h-48 py-3 px-4"
+                                            class="md3-input flex-1 bg-transparent outline-none resize-none max-h-64"
                                             rows="1"
                                             onkeydown="handleKeyDown(event)"
                                             oninput="autoResize(this)"
                                         ></textarea>
-                                        <button onclick="sendMessage()" class="p-3 rounded-xl bg-purple-600 hover:bg-purple-500 transition-colors">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                            </svg>
+                                        <button onclick="sendMessage()" class="md3-btn md3-btn-primary" style="height: 44px;">
+                                            <span class="material-symbols-rounded">send</span>
                                         </button>
                                     </div>
                                 </div>
@@ -298,54 +663,56 @@
 
         function renderOverviewView() {
             return `
-                <div class="p-8 max-w-5xl mx-auto fade-in">
-                    <h1 class="text-3xl font-light mb-2">项目概览</h1>
-                    <p class="text-gray-400 mb-8">从0到1打造医疗物流AI助手</p>
+                <div class="max-w-6xl mx-auto">
+                    <div class="mb-12">
+                        <h1 class="display-large mb-4">Overview</h1>
+                        <p class="body-large text-md3-on-surface-variant">从0到1打造医疗物流AI助手</p>
+                    </div>
                     
-                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                        <div class="glass-card p-6 rounded-xl hover:bg-white/5 transition-colors">
-                            <div class="text-4xl font-light mb-2">${siteData.metrics.trainingData}</div>
-                            <div class="text-sm text-gray-400">训练数据</div>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                        <div class="md3-card">
+                            <div class="display-medium mb-2">${siteData.metrics.trainingData}</div>
+                            <div class="body-medium text-md3-on-surface-variant">Training Data</div>
                         </div>
-                        <div class="glass-card p-6 rounded-xl hover:bg-white/5 transition-colors">
-                            <div class="text-4xl font-light mb-2">${siteData.metrics.epochs}</div>
-                            <div class="text-sm text-gray-400">训练轮次</div>
+                        <div class="md3-card">
+                            <div class="display-medium mb-2">${siteData.metrics.epochs}</div>
+                            <div class="body-medium text-md3-on-surface-variant">Training Epochs</div>
                         </div>
-                        <div class="glass-card p-6 rounded-xl hover:bg-white/5 transition-colors">
-                            <div class="text-4xl font-light mb-2">${siteData.metrics.finalLoss}</div>
-                            <div class="text-sm text-gray-400">最终 Loss</div>
+                        <div class="md3-card">
+                            <div class="display-medium mb-2">${siteData.metrics.finalLoss}</div>
+                            <div class="body-medium text-md3-on-surface-variant">Final Loss</div>
                         </div>
-                        <div class="glass-card p-6 rounded-xl hover:bg-white/5 transition-colors">
-                            <div class="text-4xl font-light mb-2">${siteData.metrics.gpuHours}</div>
-                            <div class="text-sm text-gray-400">GPU 小时</div>
+                        <div class="md3-card">
+                            <div class="display-medium mb-2">${siteData.metrics.gpuHours}</div>
+                            <div class="body-medium text-md3-on-surface-variant">GPU Hours</div>
                         </div>
-                        <div class="glass-card p-6 rounded-xl hover:bg-white/5 transition-colors">
-                            <div class="text-4xl font-light mb-2">${siteData.metrics.accuracy}%</div>
-                            <div class="text-sm text-gray-400">准确率</div>
+                        <div class="md3-card">
+                            <div class="display-medium mb-2">${siteData.metrics.accuracy}%</div>
+                            <div class="body-medium text-md3-on-surface-variant">Accuracy</div>
                         </div>
-                        <div class="glass-card p-6 rounded-xl hover:bg-white/5 transition-colors">
-                            <div class="text-4xl font-light mb-2">${siteData.metrics.inferenceTime}s</div>
-                            <div class="text-sm text-gray-400">推理时间</div>
+                        <div class="md3-card">
+                            <div class="display-medium mb-2">${siteData.metrics.inferenceTime}s</div>
+                            <div class="body-medium text-md3-on-surface-variant">Inference Time</div>
                         </div>
                     </div>
                     
-                    <div class="glass-card p-6 rounded-xl mb-6">
-                        <h2 class="text-lg font-medium mb-4">项目状态</h2>
+                    <div class="md3-card mb-8">
+                        <h2 class="headline-medium mb-6">Project Status</h2>
                         <div class="flex items-center gap-3 mb-4">
-                            <div class="w-2 h-2 bg-green-500 rounded-full pulse-indicator"></div>
-                            <span class="text-green-400 text-sm">已上线</span>
+                            <div class="w-3 h-3 bg-md3-success rounded-full animate-pulse"></div>
+                            <span class="body-medium text-md3-success">已上线</span>
                         </div>
-                        <p class="text-gray-400 text-sm">
+                        <p class="body-medium text-md3-on-surface-variant">
                             基于Qwen2.5-7B-Instruct大模型，经过LoRA微调训练，专门用于医疗物流产品咨询与售后服务的智能助手。
                         </p>
                     </div>
                     
-                    <div class="glass-card p-6 rounded-xl border-yellow-500/20">
-                        <div class="flex items-start gap-3">
-                            <span class="text-yellow-500 text-xl">⚠️</span>
+                    <div class="md3-card border-l-4 border-md3-warning">
+                        <div class="flex items-start gap-4">
+                            <span class="material-symbols-rounded text-md3-warning">warning</span>
                             <div>
-                                <h3 class="text-sm font-medium text-yellow-400 mb-2">免责声明</h3>
-                                <p class="text-xs text-gray-400">
+                                <h3 class="headline-small text-md3-warning mb-2">免责声明</h3>
+                                <p class="body-small text-md3-on-surface-variant">
                                     本项目为教学演示目的，所有数据为模拟数据，仅供学习交流使用，不构成任何商业建议。训练数据来自公开信息整理，如有侵权请联系删除。
                                 </p>
                             </div>
@@ -357,77 +724,79 @@
 
         function renderTrainingView() {
             return `
-                <div class="p-8 max-w-5xl mx-auto fade-in">
-                    <h1 class="text-3xl font-light mb-2">训练数据</h1>
-                    <p class="text-gray-400 mb-8">Loss曲线与学习率调度</p>
+                <div class="max-w-6xl mx-auto">
+                    <div class="mb-12">
+                        <h1 class="display-large mb-4">Training Data</h1>
+                        <p class="body-large text-md3-on-surface-variant">Loss曲线与学习率调度</p>
+                    </div>
                     
-                    <div class="glass-card p-6 rounded-xl mb-8">
-                        <div class="h-80">
+                    <div class="md3-card mb-12">
+                        <div class="h-96">
                             <canvas id="lossChart"></canvas>
                         </div>
                     </div>
                     
-                    <div class="grid md:grid-cols-3 gap-6">
-                        <div class="glass-card p-6 rounded-xl">
-                            <h3 class="text-sm font-medium mb-4 text-gray-300">模型架构</h3>
-                            <div class="space-y-3 text-sm">
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="md3-card">
+                            <h3 class="headline-small mb-6">Model Architecture</h3>
+                            <div class="space-y-4">
                                 <div class="flex justify-between">
-                                    <span class="text-gray-500">基座模型</span>
-                                    <span>Qwen2.5-7B-Instruct</span>
+                                    <span class="body-medium text-md3-on-surface-variant">Base Model</span>
+                                    <span class="body-medium font-medium">Qwen2.5-0.5B-Instruct</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-gray-500">微调方式</span>
-                                    <span>LoRA</span>
+                                    <span class="body-medium text-md3-on-surface-variant">Fine-tuning</span>
+                                    <span class="body-medium font-medium">LoRA</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-gray-500">Rank</span>
-                                    <span>8</span>
+                                    <span class="body-medium text-md3-on-surface-variant">Rank</span>
+                                    <span class="body-medium font-medium">8</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-gray-500">Alpha</span>
-                                    <span>16</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="glass-card p-6 rounded-xl">
-                            <h3 class="text-sm font-medium mb-4 text-gray-300">训练配置</h3>
-                            <div class="space-y-3 text-sm">
-                                <div class="flex justify-between">
-                                    <span class="text-gray-500">Batch Size</span>
-                                    <span>4</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-500">梯度累积</span>
-                                    <span>4</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-500">学习率</span>
-                                    <span>5e-5</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-500">优化器</span>
-                                    <span>AdamW</span>
+                                    <span class="body-medium text-md3-on-surface-variant">Alpha</span>
+                                    <span class="body-medium font-medium">16</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="glass-card p-6 rounded-xl">
-                            <h3 class="text-sm font-medium mb-4 text-gray-300">数据分布</h3>
-                            <div class="space-y-3 text-sm">
+                        <div class="md3-card">
+                            <h3 class="headline-small mb-6">Training Configuration</h3>
+                            <div class="space-y-4">
                                 <div class="flex justify-between">
-                                    <span class="text-gray-500">产品介绍</span>
-                                    <span>60条</span>
+                                    <span class="body-medium text-md3-on-surface-variant">Batch Size</span>
+                                    <span class="body-medium font-medium">4</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-gray-500">技术优势</span>
-                                    <span>50条</span>
+                                    <span class="body-medium text-md3-on-surface-variant">Gradient Accumulation</span>
+                                    <span class="body-medium font-medium">4</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-gray-500">售后服务</span>
-                                    <span>45条</span>
+                                    <span class="body-medium text-md3-on-surface-variant">Learning Rate</span>
+                                    <span class="body-medium font-medium">5e-5</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-gray-500">其他</span>
-                                    <span>45条</span>
+                                    <span class="body-medium text-md3-on-surface-variant">Optimizer</span>
+                                    <span class="body-medium font-medium">AdamW</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md3-card">
+                            <h3 class="headline-small mb-6">Data Distribution</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between">
+                                    <span class="body-medium text-md3-on-surface-variant">产品介绍</span>
+                                    <span class="body-medium font-medium">80条</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="body-medium text-md3-on-surface-variant">技术优势</span>
+                                    <span class="body-medium font-medium">70条</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="body-medium text-md3-on-surface-variant">售后服务</span>
+                                    <span class="body-medium font-medium">80条</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="body-medium text-md3-on-surface-variant">其他</span>
+                                    <span class="body-medium font-medium">70条</span>
                                 </div>
                             </div>
                         </div>
@@ -438,31 +807,29 @@
 
         function renderProjectsView() {
             return `
-                <div class="p-8 max-w-5xl mx-auto fade-in">
-                    <h1 class="text-3xl font-light mb-2">项目里程碑</h1>
-                    <p class="text-gray-400 mb-8">产品经理视角的项目演进</p>
+                <div class="max-w-6xl mx-auto">
+                    <div class="mb-12">
+                        <h1 class="display-large mb-4">Projects</h1>
+                        <p class="body-large text-md3-on-surface-variant">产品经理视角的项目演进</p>
+                    </div>
                     
-                    <div class="space-y-4">
+                    <div class="space-y-6">
                         ${siteData.projects.map((project) => `
-                            <div class="glass-card p-6 rounded-xl">
-                                <div class="flex items-start justify-between mb-3">
+                            <div class="md3-card">
+                                <div class="flex items-start justify-between mb-4">
                                     <div>
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <h3 class="text-lg font-medium">${project.title}</h3>
-                                            <span class="px-2 py-1 text-xs rounded-full ${
-                                                project.status === '已上线' ? 'bg-green-500/20 text-green-400' :
-                                                project.status === '已完成' ? 'bg-blue-500/20 text-blue-400' :
-                                                'bg-yellow-500/20 text-yellow-400'
-                                            }">
+                                        <div class="flex items-center gap-4 mb-3">
+                                            <h3 class="headline-medium">${project.title}</h3>
+                                            <span class="md3-badge ${project.status === '已上线' ? 'md3-badge-success' : project.status === '已完成' ? 'md3-badge-info' : 'md3-badge-warning'}">
                                                 ${project.status}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
-                                <p class="text-gray-400 text-sm mb-4">${project.description}</p>
-                                <div class="flex flex-wrap gap-2">
+                                <p class="body-medium text-md3-on-surface-variant mb-6">${project.description}</p>
+                                <div class="flex flex-wrap gap-3">
                                     ${project.keywords.map(kw => `
-                                        <span class="px-2 py-1 text-xs rounded-full bg-white/5 text-gray-400">
+                                        <span class="md3-badge md3-badge-info">
                                             ${kw}
                                         </span>
                                     `).join('')}
@@ -476,7 +843,7 @@
 
         function switchView(view) {
             currentView = view;
-            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             document.getElementById('nav-' + view).classList.add('active');
             
             const mainContent = document.getElementById('mainContent');
@@ -524,11 +891,12 @@
             
             if (siteData.config.useRealModel) {
                 try {
-                    const response = await callHuggingFaceModel(message);
+                    const response = await callModelScopeModel(message);
                     chatHistory[chatHistory.length - 1] = { role: 'assistant', content: response };
                 } catch (error) {
                     chatHistory[chatHistory.length - 1] = { role: 'assistant', content: '抱歉，模型调用失败：' + error.message + '\n\n已自动切换到演示模式。' };
                     siteData.config.useRealModel = false;
+                    updateModelModeButton();
                 }
             } else {
                 setTimeout(() => {
@@ -562,28 +930,31 @@
             if (chatMessages) {
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }
+            
+            input.value = '';
+            input.style.height = 'auto';
         }
 
-        async function callHuggingFaceModel(message) {
-            const spaceUrl = siteData.config.huggingFaceSpace + '/predict';
-            const messages = [
-                { role: 'system', content: siteData.config.systemPrompt }
-            ];
+        async function callModelScopeModel(message) {
+            const apiUrl = siteData.config.modelScopeApi + '/call/predict';
             
+            const messages = [];
             for (const msg of chatHistory) {
                 if (msg.role === 'user' && msg.content) {
-                    messages.push({ role: 'user', content: msg.content });
-                } else if (msg.role === 'assistant' && msg.content) {
-                    messages.push({ role: 'assistant', content: msg.content });
+                    messages.push([msg.content, null]);
+                } else if (msg.role === 'assistant' && msg.content && !msg.isTyping) {
+                    if (messages.length > 0) {
+                        messages[messages.length - 1][1] = msg.content;
+                    }
                 }
             }
             
-            messages.push({ role: 'user', content: message });
-            
-            const response = await fetch(spaceUrl, {
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ data: [messages, null, null, null, null, null, null, null, null] })
+                body: JSON.stringify({
+                    data: [message, messages]
+                })
             });
             
             if (!response.ok) {
@@ -591,15 +962,28 @@
             }
             
             const result = await response.json();
-            return result.data[0];
+            return result.data;
         }
 
         function toggleModelMode() {
             siteData.config.useRealModel = !siteData.config.useRealModel;
+            updateModelModeButton();
+        }
+
+        function updateModelModeButton() {
             const btn = document.getElementById('modelModeBtn');
             if (btn) {
-                btn.textContent = siteData.config.useRealModel ? '🔴 真实模型' : '🟡 演示模式';
-                btn.title = siteData.config.useRealModel ? '点击切换到演示模式' : '点击切换到真实模型（需要模型已上传到Hugging Face）';
+                btn.innerHTML = siteData.config.useRealModel ? 
+                    '<span class="material-symbols-rounded">radio_button_checked</span><span>Real Model</span>' : 
+                    '<span class="material-symbols-rounded">radio_button_unchecked</span><span>Demo Mode</span>';
+                
+                if (siteData.config.useRealModel) {
+                    btn.classList.remove('md3-btn-outline');
+                    btn.classList.add('md3-btn-primary');
+                } else {
+                    btn.classList.remove('md3-btn-primary');
+                    btn.classList.add('md3-btn-outline');
+                }
             }
         }
 
@@ -612,7 +996,7 @@
 
         function autoResize(textarea) {
             textarea.style.height = 'auto';
-            textarea.style.height = Math.min(textarea.scrollHeight, 192) + 'px';
+            textarea.style.height = Math.min(textarea.scrollHeight, 256) + 'px';
         }
 
         function initChart() {
@@ -627,8 +1011,8 @@
                         {
                             label: 'Loss',
                             data: siteData.trainingCurve.loss,
-                            borderColor: '#8b5cf6',
-                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            borderColor: '#1A73E8',
+                            backgroundColor: 'rgba(26, 115, 232, 0.1)',
                             tension: 0.4,
                             fill: true,
                             yAxisID: 'y'
@@ -636,8 +1020,8 @@
                         {
                             label: 'Learning Rate (e-5)',
                             data: siteData.trainingCurve.learningRate.map(lr => lr * 1e5),
-                            borderColor: '#22c55e',
-                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                            borderColor: '#34A853',
+                            backgroundColor: 'rgba(52, 168, 83, 0.1)',
                             tension: 0.4,
                             fill: true,
                             yAxisID: 'y1'
@@ -653,39 +1037,21 @@
                     },
                     plugins: {
                         legend: {
-                            labels: {
-                                color: 'rgba(255, 255, 255, 0.6)'
-                            }
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Training Loss and Learning Rate'
                         }
                     },
                     scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Epoch',
-                                color: 'rgba(255, 255, 255, 0.5)'
-                            },
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.05)'
-                            },
-                            ticks: {
-                                color: 'rgba(255, 255, 255, 0.4)'
-                            }
-                        },
                         y: {
                             type: 'linear',
                             display: true,
                             position: 'left',
                             title: {
                                 display: true,
-                                text: 'Loss',
-                                color: '#8b5cf6'
-                            },
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.05)'
-                            },
-                            ticks: {
-                                color: 'rgba(255, 255, 255, 0.4)'
+                                text: 'Loss'
                             }
                         },
                         y1: {
@@ -694,14 +1060,10 @@
                             position: 'right',
                             title: {
                                 display: true,
-                                text: 'Learning Rate (e-5)',
-                                color: '#22c55e'
+                                text: 'Learning Rate (e-5)'
                             },
                             grid: {
                                 drawOnChartArea: false
-                            },
-                            ticks: {
-                                color: 'rgba(255, 255, 255, 0.4)'
                             }
                         }
                     }
@@ -709,8 +1071,9 @@
             });
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('mainContent').innerHTML = renderChatView();
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            switchView('chat');
         });
     </script>
 </body>
