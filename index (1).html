@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Logistics AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f4efe6;
+            --surface: #ede7dc;
+            --surface-2: #e4ddd0;
+            --border: #d3cbbf;
+            --border-subtle: #dbd4c8;
+            --text: #1a1714;
+            --text-2: #6a6460;
+            --text-3: #9b9590;
+            --accent: #bf7b37;
+            --accent-dim: rgba(191,123,55,0.1);
+            --success: #4a7c59;
+            --warning: #b07530;
+            --w: 248px;
+            --r: 10px;
+            --r-sm: 6px;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Layout */
+        .app { display:flex; height:100vh; }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--w);
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        .sb-top {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .brand-mark {
+            width: 32px; height: 32px;
+            background: var(--text);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .brand-mark svg { width:16px; height:16px; color: var(--bg); }
+        .brand-name {
+            font-family: 'Instrument Serif', serif;
+            font-size: 15px;
+            line-height: 1.2;
+        }
+        .brand-sub {
+            font-size: 10px;
+            color: var(--text-3);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        .new-btn {
+            width: 100%;
+            padding: 9px 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            color: var(--text-2);
+            font-size: 13px;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all .15s;
+        }
+        .new-btn:hover { background: var(--surface-2); color: var(--text); }
+        .new-btn svg { width:14px; height:14px; }
+
+        .sb-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 10px;
+        }
+        .nav-lbl {
+            font-size: 10px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-3);
+            padding: 8px 8px 4px;
+        }
+        .nav-item {
+            width: 100%;
+            padding: 8px 10px;
+            margin: 1px 0;
+            border-radius: var(--r-sm);
+            color: var(--text-2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            transition: all .15s;
+            font-size: 13.5px;
+            font-weight: 400;
+            background: transparent;
+            border: none;
+            text-align: left;
+            font-family: inherit;
+        }
+        .nav-item svg { width:15px; height:15px; flex-shrink:0; }
+        .nav-item:hover { background: var(--surface-2); color: var(--text); }
+        .nav-item.active {
+            background: var(--bg);
+            color: var(--text);
+            font-weight: 500;
+            box-shadow: 0 1px 3px rgba(0,0,0,.07);
+        }
+
+        .sb-foot {
+            padding: 14px;
+            border-top: 1px solid var(--border-subtle);
+        }
+        .mode-lbl {
+            font-size: 10px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--text-3);
+            margin-bottom: 8px;
+        }
+        .mode-toggle {
+            display: flex;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        .tog {
+            flex: 1;
+            padding: 7px 6px;
+            font-size: 12px;
+            color: var(--text-3);
+            cursor: pointer;
+            text-align: center;
+            transition: all .15s;
+            background: transparent;
+            border: none;
+            font-family: inherit;
+        }
+        .tog.active { background: var(--text); color: var(--bg); font-weight: 500; }
+        .ext-btn {
+            width: 100%;
+            padding: 8px 12px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            color: var(--text-2);
+            font-size: 12.5px;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all .15s;
+            margin-bottom: 10px;
+        }
+        .ext-btn:hover { background: var(--accent); border-color: var(--accent); color: white; }
+        .ext-btn svg { width:12px; height:12px; }
+        .mode-hint { font-size: 11px; color: var(--text-3); line-height: 1.5; margin-bottom: 14px; }
+        .user-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            border-radius: var(--r-sm);
+            cursor: pointer;
+            transition: background .15s;
+        }
+        .user-row:hover { background: var(--surface-2); }
+        .user-av {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            background: var(--text);
+            color: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10.5px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .user-name { font-size: 13px; font-weight: 500; }
+        .user-role { font-size: 11px; color: var(--text-3); }
+
+        /* Main */
+        .main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+        #mainContent { display:flex; flex-direction:column; height:100%; overflow:hidden; }
+
+        /* Chat */
+        .chat-wrap { display:flex; flex-direction:column; height:100%; }
+        .msgs-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px 28px 12px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+        }
+        .msgs-scroll::-webkit-scrollbar { width: 4px; }
+        .msgs-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+        .msgs-inner { max-width: 720px; margin: 0 auto; }
+
+        /* Welcome */
+        .welcome {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 68vh;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .welcome-icon {
+            width: 54px; height: 54px;
+            background: var(--text);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 22px;
+        }
+        .welcome-icon svg { width:26px; height:26px; color: var(--bg); }
+        .welcome-title {
+            font-family: 'Instrument Serif', serif;
+            font-size: 34px;
+            letter-spacing: -0.02em;
+            margin-bottom: 10px;
+            line-height: 1.15;
+        }
+        .welcome-sub {
+            font-size: 15px;
+            color: var(--text-2);
+            font-weight: 300;
+            margin-bottom: 40px;
+            max-width: 360px;
+            line-height: 1.55;
+        }
+        .quick-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            width: 100%;
+            max-width: 500px;
+        }
+        .qcard {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 14px 16px;
+            cursor: pointer;
+            text-align: left;
+            transition: all .18s;
+        }
+        .qcard:hover {
+            background: var(--surface-2);
+            border-color: var(--text-3);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(0,0,0,.07);
+        }
+        .qcard:last-child:nth-child(odd) { grid-column: 1 / -1; }
+        .qc-t { font-size: 13.5px; font-weight: 500; margin-bottom: 3px; }
+        .qc-d { font-size: 12px; color: var(--text-3); line-height: 1.4; }
+
+        /* Messages */
+        .msg {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 28px;
+            animation: fadeUp .22s ease forwards;
+        }
+        @keyframes fadeUp {
+            from { opacity:0; transform: translateY(8px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+        .msg-av {
+            width: 26px; height: 26px;
+            border-radius: 6px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 2px;
+        }
+        .msg-av.ai { background: var(--text); }
+        .msg-av.ai svg { width:14px; height:14px; color: var(--bg); }
+        .msg-av.user { background: var(--accent); font-size: 10px; font-weight: 600; color: white; }
+        .msg-body { flex:1; min-width:0; }
+        .msg-who {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-3);
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            margin-bottom: 6px;
+        }
+        .msg-txt {
+            font-size: 15px;
+            line-height: 1.65;
+            color: var(--text);
+            white-space: pre-wrap;
+        }
+        .typing { display:flex; gap:5px; align-items:center; padding:4px 0; }
+        .td {
+            width:5px; height:5px;
+            border-radius:50%;
+            background: var(--text-3);
+            animation: blink 1.3s infinite;
+        }
+        .td:nth-child(2) { animation-delay:.2s; }
+        .td:nth-child(3) { animation-delay:.4s; }
+        @keyframes blink { 0%,60%,100% { opacity:.2; } 30% { opacity:1; } }
+
+        /* Input */
+        .input-zone {
+            padding: 10px 28px 18px;
+            border-top: 1px solid var(--border-subtle);
+        }
+        .input-wrap {
+            max-width: 720px;
+            margin: 0 auto;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            padding: 11px 12px;
+            transition: border-color .15s, box-shadow .15s;
+        }
+        .input-wrap:focus-within {
+            border-color: var(--text-3);
+            box-shadow: 0 0 0 3px rgba(26,23,20,.06);
+        }
+        .chat-ta {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-size: 14.5px;
+            font-family: inherit;
+            resize: none;
+            outline: none;
+            max-height: 200px;
+            line-height: 1.5;
+        }
+        .chat-ta::placeholder { color: var(--text-3); }
+        .send-btn {
+            width: 30px; height: 30px;
+            border-radius: 7px;
+            border: none;
+            background: var(--text);
+            color: var(--bg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .15s;
+            flex-shrink: 0;
+        }
+        .send-btn:hover:not(:disabled) { background: var(--accent); transform: scale(1.05); }
+        .send-btn:disabled { opacity:.28; cursor:not-allowed; }
+        .send-btn svg { width:14px; height:14px; }
+        .input-hint { text-align:center; font-size:11px; color:var(--text-3); margin-top:7px; max-width:720px; margin-left:auto; margin-right:auto; }
+
+        /* Pages */
+        .page-view {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px 28px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+        }
+        .page-view::-webkit-scrollbar { width:4px; }
+        .page-view::-webkit-scrollbar-thumb { background: var(--border); border-radius:2px; }
+        .page-inner { max-width: 840px; margin: 0 auto; }
+        .page-hd { margin-bottom: 28px; }
+        .page-title {
+            font-family: 'Instrument Serif', serif;
+            font-size: 28px;
+            letter-spacing: -0.02em;
+            margin-bottom: 5px;
+        }
+        .page-sub { font-size: 13.5px; color: var(--text-2); font-weight: 300; }
+
+        .metrics-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
+        .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 18px 20px; }
+        .m-lbl { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--text-3); margin-bottom:10px; }
+        .m-val { font-family:'Instrument Serif',serif; font-size:32px; letter-spacing:-0.02em; line-height:1; }
+
+        .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:20px; margin-bottom:10px; }
+        .card-ttl { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--text-2); margin-bottom:16px; }
+        .kv-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:0 24px; }
+        .kv { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border-subtle); }
+        .kv:last-child { border-bottom:none; }
+        .kv-k { font-size:12.5px; color:var(--text-2); }
+        .kv-v { font-size:12.5px; color:var(--text); font-weight:500; font-variant-numeric:tabular-nums; }
+
+        .disclaimer { background:rgba(176,117,48,.07); border:1px solid rgba(176,117,48,.2); border-radius:var(--r); padding:16px; margin-top:14px; }
+        .disc-hd { font-size:12px; font-weight:600; color:var(--warning); margin-bottom:6px; }
+        .disc-bd { font-size:12.5px; color:var(--text-2); line-height:1.6; }
+
+        .chart-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:20px; margin-bottom:10px; }
+        .chart-ttl { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--text-2); margin-bottom:16px; }
+        .chart-wrap { height:280px; }
+
+        .proj-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:20px; margin-bottom:10px; transition:all .18s; }
+        .proj-card:hover { border-color:var(--text-3); box-shadow:0 4px 16px rgba(0,0,0,.06); }
+        .proj-hd { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+        .proj-name { font-size:15px; font-weight:600; }
+        .pill { padding:3px 10px; border-radius:99px; font-size:11px; font-weight:500; }
+        .pill.green { background:rgba(74,124,89,.1); color:var(--success); }
+        .pill.amber { background:rgba(176,117,48,.1); color:var(--warning); }
+        .proj-desc { font-size:13px; color:var(--text-2); line-height:1.6; margin-bottom:14px; }
+        .tags { display:flex; flex-wrap:wrap; gap:6px; }
+        .tag { padding:3px 10px; border-radius:99px; font-size:11px; background:var(--surface-2); color:var(--text-2); border:1px solid var(--border-subtle); }
+
+        @media (max-width:768px) {
+            .sidebar { position:fixed; left:calc(-1 * var(--w)); top:0; bottom:0; z-index:100; transition:left .22s; }
+            .sidebar.open { left:0; }
+            .metrics-row { grid-template-columns:1fr; }
+            .quick-grid { grid-template-columns:1fr; }
+            .kv-grid { grid-template-columns:1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+
+<aside class="sidebar">
+    <div class="sb-top">
+        <div class="brand">
+            <div class="brand-mark">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+            </div>
+            <div>
+                <div class="brand-name">MedLogistics</div>
+                <div class="brand-sub">AI Assistant</div>
+            </div>
+        </div>
+        <button onclick="newChat()" class="new-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            New conversation
+        </button>
+    </div>
+
+    <div class="sb-nav">
+        <div class="nav-lbl">Navigation</div>
+        <button onclick="switchView('chat')" id="nav-chat" class="nav-item active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Chat
+        </button>
+        <button onclick="switchView('overview')" id="nav-overview" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+            Overview
+        </button>
+        <button onclick="switchView('training')" id="nav-training" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M18 17l-5-5-4 4-5-5"/></svg>
+            Training
+        </button>
+        <button onclick="switchView('projects')" id="nav-projects" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            Projects
+        </button>
+    </div>
+
+    <div class="sb-foot">
+        <div class="mode-lbl">Model Mode</div>
+        <div class="mode-toggle">
+            <button id="demoOpt" class="tog active" onclick="setMode(false)">Demo</button>
+            <button id="realOpt" class="tog" onclick="setMode(true)">Real Model</button>
+        </div>
+        <button onclick="openRealModel()" class="ext-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Open on ModelScope
+        </button>
+        <p class="mode-hint">Demo uses preset responses. Real Model connects to the fine-tuned model on ModelScope.</p>
+        <div class="user-row">
+            <div class="user-av">ML</div>
+            <div>
+                <div class="user-name">AI Developer</div>
+                <div class="user-role">Product Manager</div>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<main class="main">
+    <div id="mainContent"></div>
+</main>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const data = {
+    config: {
+        useRealModel: false,
+        modelScopeSpace: 'https://www.modelscope.cn/studios/Ethanspace/medical-logistics-ai',
+        modelScopeApi: 'https://www.modelscope.cn/api/v1/studios/Ethanspace/medical-logistics-ai/gradio'
+    },
+    metrics: { trainingData:300, epochs:100, finalLoss:1.89, gpuHours:1.5 },
+    projects: [
+        { id:1, title:"Medical Logistics AI Assistant", description:"基于Qwen2.5-0.5B-Instruct大模型，经过LoRA微调训练，专门用于医疗物流产品咨询与售后服务的智能助手。训练了300+条专业数据，100个epoch，最终Loss降至1.89。部署在ModelScope平台，免费对外提供服务。", keywords:["Large Model","LoRA","Qwen","Medical Logistics","SFT","ModelScope"], status:"已上线" },
+        { id:2, title:"Hospital Logistics Knowledge Base", description:"构建了包含300+条专业问答的医疗物流知识库，覆盖轨道物流、箱式物流、气动物流、物流机器人等产品的介绍、优势、售后等内容。数据经过清洗，移除品牌信息，确保合规使用。", keywords:["Knowledge Base","Data Annotation","NLP","Data Cleaning"], status:"已完成" },
+        { id:3, title:"Model Training Visualization", description:"实时监控和可视化大模型训练过程，包括Loss曲线、学习率调度、GPU利用率等关键指标，帮助优化训练策略。", keywords:["Visualization","Training Monitoring","Matplotlib"], status:"开发中" }
+    ],
+    trainingCurve: {
+        epochs: [1,10,20,30,40,50,60,70,80,90,100],
+        loss: [3.708,3.521,3.210,2.987,2.765,2.543,2.321,2.100,1.987,1.923,1.890],
+        learningRate: [5e-5,4.8e-5,4.2e-5,3.5e-5,2.8e-5,2.1e-5,1.5e-5,1.0e-5,6e-6,3e-6,1e-7]
+    },
+    responses: {
+        "产品":"我们的核心产品包括：中型轨道物流传输系统、箱式物流传输系统、气动物流传输系统、物流机器人、垃圾污被服收集处理系统等，提供智慧物流全场景解决方案。轨道系统载重15kg，速度0.1-1m/s；箱式系统载重30-50kg，适合大件运输；气动系统速度5-8m/s，快速传输小件；机器人采用SLAM导航，无需改造环境。",
+        "有哪些产品":"我们的核心产品包括：中型轨道物流传输系统、箱式物流传输系统、气动物流传输系统、物流机器人、垃圾污被服收集处理系统等，提供智慧物流全场景解决方案。轨道系统载重15kg，速度0.1-1m/s；箱式系统载重30-50kg，适合大件运输；气动系统速度5-8m/s，快速传输小件；机器人采用SLAM导航，无需改造环境。",
+        "轨道物流":"中型轨道物流传输系统以收发工作站、传输小车、轨道、换轨器、控制软件等为核心，传输速度0.1-1m/s，载重可达15kg，适合输送输液袋、药品、耗材、检验标本、病历档案等。系统采用不锈钢材质，使用寿命长达20年以上，已服务超过500家医院，日均传输量可达10000次以上。",
+        "箱式物流":"箱式物流传输系统具有载重量大、复用率高的特点，载重可达30-50kg，周转箱可循环使用，适合输送输液包、手术包、餐食、被服等大件物品。系统设计容量为每小时500箱，可根据医院规模灵活配置，能耗比传统方式降低60%，占地节省40%。",
+        "气动物流":"气动物流传输系统速度快，传输速度可达5-8m/s，适合快速传输检验标本、紧急药品、血液制品等小件物品。管道采用不锈钢材质，直径110mm，单次传输时间仅需10-30秒，是急诊、ICU等科室的理想选择，已累计完成超过1000万次安全传输。",
+        "物流机器人":"物流机器人采用自然导航SLAM技术，无需改造医院环境，灵活调度，适合平疫结合的运输场景。单台机器人载重可达100kg，续航8小时，充电2小时，支持多机器人协同调度，效率提升300%，已在200+医院投入使用。",
+        "优势":"我们产品的核心优势包括：国家高新技术企业、专精特新企业、300+项知识产权、20年+使用寿命、全程数字化可追溯、平疫结合无人化运输、定制化解决方案。已服务500+医院，覆盖30个省份，市场占有率领先，日均处理物流量超过100万次。",
+        "技术优势":"我们产品的核心优势包括：国家高新技术企业、专精特新企业、300+项知识产权、20年+使用寿命、全程数字化可追溯、平疫结合无人化运输、定制化解决方案。已服务500+医院，覆盖30个省份，市场占有率领先，日均处理物流量超过100万次。",
+        "使用寿命":"我们的管道及投放门采用304不锈钢材质，使用寿命长达20年以上，适配医院每日高频次、高负荷使用场景。系统设计标准为每日20000次传输，经过1000万次循环测试，核心部件寿命可达25年，提供长期稳定的服务保障。",
+        "售后服务":"我们提供完善的售后服务体系，包括专业的安装调试、定期维护保养、快速响应的故障维修、系统升级优化、操作培训等全流程服务。全国设有30+服务中心，24小时热线，4小时现场响应，定期巡检，终身技术支持，确保系统稳定运行。",
+        "定制":"是的，我们深刻理解医院的临床流程与管理需求，能提供最贴合实际的专业定制化解决方案，根据不同医院的实际情况量身打造智能物流系统。拥有100+定制案例，支持模块化配置，灵活扩展，适配新旧院区改造，提供从规划到实施的全流程服务。",
+        "你好":"你好！我是智能医疗物流助手，可以为你介绍我们的智能物流系统、产品优势、售后服务等内容。我们提供轨道物流、箱式物流、气动物流、物流机器人等全场景解决方案，已服务500+医院。请问有什么可以帮你的吗？",
+        "您好":"你好！我是智能医疗物流助手，可以为你介绍我们的智能物流系统、产品优势、售后服务等内容。我们提供轨道物流、箱式物流、气动物流、物流机器人等全场景解决方案，已服务500+医院。请问有什么可以帮你的吗？"
+    },
+    quickQ: [
+        { t:'有哪些产品？', d:'了解我们的智能物流产品线' },
+        { t:'技术优势是什么？', d:'探索产品的核心竞争力' },
+        { t:'轨道物流介绍', d:'详细了解轨道物流系统' },
+        { t:'物流机器人特点', d:'了解智能导航机器人' },
+        { t:'售后服务内容', d:'查看售后支持体系' }
+    ]
+};
+
+let currentView='chat', chartInst=null, history=[];
+
+function newChat() { history=[]; switchView('chat'); }
+
+function switchView(v) {
+    currentView=v;
+    document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+    document.getElementById('nav-'+v).classList.add('active');
+    const mc=document.getElementById('mainContent');
+    mc.style.cssText='display:flex;flex-direction:column;height:100%;overflow:hidden;';
+    switch(v) {
+        case 'chat': mc.innerHTML=renderChat(); break;
+        case 'overview': mc.innerHTML=renderOverview(); break;
+        case 'training': mc.innerHTML=renderTraining(); setTimeout(initChart,100); break;
+        case 'projects': mc.innerHTML=renderProjects(); break;
+    }
+}
+
+const aiIcon=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+
+function renderChat() {
+    if(history.length===0) return `
+    <div class="chat-wrap">
+      <div class="msgs-scroll"><div class="msgs-inner">
+        <div class="welcome">
+          <div class="welcome-icon">${aiIcon}</div>
+          <h1 class="welcome-title">Medical Logistics AI</h1>
+          <p class="welcome-sub">智能医疗物流助手，为您提供专业的产品咨询与解决方案</p>
+          <div class="quick-grid">${data.quickQ.map(q=>`
+            <div class="qcard" onclick="quickAsk('${q.t}')">
+              <div class="qc-t">${q.t}</div>
+              <div class="qc-d">${q.d}</div>
+            </div>`).join('')}</div>
+        </div>
+      </div></div>
+      ${renderInput()}
+    </div>`;
+
+    return `
+    <div class="chat-wrap">
+      <div class="msgs-scroll"><div class="msgs-inner">
+        ${history.map(m=>`
+          <div class="msg">
+            ${m.role==='assistant'?`<div class="msg-av ai">${aiIcon}</div>`:''}
+            <div class="msg-body">
+              <div class="msg-who">${m.role==='user'?'You':'Assistant'}</div>
+              <div class="msg-txt">${m.isTyping?`<div class="typing"><div class="td"></div><div class="td"></div><div class="td"></div></div>`:m.content}</div>
+            </div>
+            ${m.role==='user'?`<div class="msg-av user">You</div>`:''}
+          </div>`).join('')}
+      </div></div>
+      ${renderInput()}
+    </div>`;
+}
+
+function renderInput() {
+    return `
+    <div class="input-zone">
+      <div class="input-wrap">
+        <textarea id="chatInput" class="chat-ta" placeholder="发送消息…" rows="1"
+          onkeydown="handleKey(event)" oninput="resize(this)"></textarea>
+        <button id="sendBtn" onclick="send()" class="send-btn" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+      <p class="input-hint">Enter 发送 · Shift+Enter 换行</p>
+    </div>`;
+}
+
+function quickAsk(q) {
+    switchView('chat');
+    setTimeout(()=>{ const inp=document.getElementById('chatInput'); if(inp){inp.value=q;send();} },100);
+}
+
+async function send() {
+    const inp=document.getElementById('chatInput');
+    if(!inp) return;
+    const msg=inp.value.trim();
+    if(!msg) return;
+    history.push({role:'user',content:msg});
+    history.push({role:'assistant',content:'',isTyping:true});
+    const mc=document.getElementById('mainContent');
+    mc.innerHTML=renderChat();
+    mc.style.cssText='display:flex;flex-direction:column;height:100%;overflow:hidden;';
+    scroll();
+    if(data.config.useRealModel) {
+        try {
+            const res=await callAPI(msg);
+            history[history.length-1]={role:'assistant',content:res};
+        } catch(e) {
+            history[history.length-1]={role:'assistant',content:'抱歉，模型调用失败：'+e.message+'\n\n已自动切换到演示模式。'};
+            data.config.useRealModel=false; updateMode();
+        }
+    } else {
+        setTimeout(()=>{
+            let res="感谢你的提问！我可以为你介绍我们的智能物流产品、技术优势和售后服务。试试问：有哪些产品？技术优势是什么？";
+            let maxLen=0,best=null;
+            for(const k in data.responses){ if(msg.includes(k)&&k.length>maxLen){maxLen=k.length;best=k;} }
+            if(best) res=data.responses[best];
+            history[history.length-1]={role:'assistant',content:res};
+            mc.innerHTML=renderChat();
+            mc.style.cssText='display:flex;flex-direction:column;height:100%;overflow:hidden;';
+            scroll();
+        },600);
+    }
+}
+
+function scroll() { setTimeout(()=>{ const s=document.querySelector('.msgs-scroll'); if(s)s.scrollTop=s.scrollHeight; },50); }
+
+async function callAPI(msg) {
+    const url=data.config.modelScopeApi+'/call/predict';
+    const msgs=[];
+    for(const m of history) {
+        if(m.role==='user'&&m.content) msgs.push([m.content,null]);
+        else if(m.role==='assistant'&&m.content&&!m.isTyping){ if(msgs.length>0) msgs[msgs.length-1][1]=m.content; }
+    }
+    const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:[msg,msgs]})});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return (await r.json()).data;
+}
+
+function setMode(useReal) { data.config.useRealModel=useReal; updateMode(); }
+function updateMode() {
+    document.getElementById('demoOpt').classList.toggle('active',!data.config.useRealModel);
+    document.getElementById('realOpt').classList.toggle('active',data.config.useRealModel);
+}
+function openRealModel() { window.open(data.config.modelScopeSpace,'_blank'); }
+function handleKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();} }
+function resize(ta) {
+    ta.style.height='auto';
+    ta.style.height=Math.min(ta.scrollHeight,200)+'px';
+    const b=document.getElementById('sendBtn'); if(b) b.disabled=ta.value.trim()==='';
+}
+
+function renderOverview() { return `
+<div class="page-view"><div class="page-inner">
+  <div class="page-hd"><h1 class="page-title">Project Overview</h1><p class="page-sub">深入了解项目架构、训练配置和技术细节</p></div>
+  <div class="metrics-row">
+    <div class="metric-card"><div class="m-lbl">Training Data</div><div class="m-val">${data.metrics.trainingData}</div></div>
+    <div class="metric-card"><div class="m-lbl">Epochs</div><div class="m-val">${data.metrics.epochs}</div></div>
+    <div class="metric-card"><div class="m-lbl">Final Loss</div><div class="m-val">${data.metrics.finalLoss}</div></div>
+  </div>
+  <div class="card">
+    <div class="card-ttl">Model Architecture</div>
+    <div class="kv-grid">
+      <div class="kv"><span class="kv-k">Base Model</span><span class="kv-v">Qwen2.5-0.5B-Instruct</span></div>
+      <div class="kv"><span class="kv-k">Fine-tuning</span><span class="kv-v">LoRA</span></div>
+      <div class="kv"><span class="kv-k">Parameters</span><span class="kv-v">0.5B</span></div>
+      <div class="kv"><span class="kv-k">GPU Hours</span><span class="kv-v">${data.metrics.gpuHours}h</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-ttl">Training Configuration</div>
+    <div class="kv-grid">
+      <div class="kv"><span class="kv-k">Batch Size</span><span class="kv-v">4</span></div>
+      <div class="kv"><span class="kv-k">Learning Rate</span><span class="kv-v">5e-5</span></div>
+      <div class="kv"><span class="kv-k">LoRA Rank</span><span class="kv-v">8</span></div>
+      <div class="kv"><span class="kv-k">LoRA Alpha</span><span class="kv-v">16</span></div>
+    </div>
+  </div>
+  <div class="disclaimer">
+    <div class="disc-hd">⚠ 免责声明</div>
+    <div class="disc-bd">本项目仅用于学习和演示目的。所有数据均为公开信息整理，已移除品牌信息，避免商业风险。模型回复仅供参考，不构成任何专业建议。如需实际应用，请咨询相关领域专家。</div>
+  </div>
+</div></div>`; }
+
+function renderTraining() { return `
+<div class="page-view"><div class="page-inner">
+  <div class="page-hd"><h1 class="page-title">Training Data</h1><p class="page-sub">训练过程可视化与数据详情</p></div>
+  <div class="chart-card">
+    <div class="chart-ttl">Training Loss & Learning Rate</div>
+    <div class="chart-wrap"><canvas id="lossChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-ttl">Training Details</div>
+    <div class="kv-grid">
+      <div class="kv"><span class="kv-k">Total Training Samples</span><span class="kv-v">${data.metrics.trainingData}</span></div>
+      <div class="kv"><span class="kv-k">Training Epochs</span><span class="kv-v">${data.metrics.epochs}</span></div>
+      <div class="kv"><span class="kv-k">Initial Loss</span><span class="kv-v">${data.trainingCurve.loss[0]}</span></div>
+      <div class="kv"><span class="kv-k">Final Loss</span><span class="kv-v">${data.trainingCurve.loss[data.trainingCurve.loss.length-1]}</span></div>
+      <div class="kv"><span class="kv-k">Initial LR</span><span class="kv-v">${data.trainingCurve.learningRate[0]}</span></div>
+      <div class="kv"><span class="kv-k">Final LR</span><span class="kv-v">${data.trainingCurve.learningRate[data.trainingCurve.learningRate.length-1]}</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-ttl">Data Distribution</div>
+    <div class="kv-grid">
+      <div class="kv"><span class="kv-k">Product Introduction</span><span class="kv-v">40%</span></div>
+      <div class="kv"><span class="kv-k">Technical Advantages</span><span class="kv-v">25%</span></div>
+      <div class="kv"><span class="kv-k">After-sales Service</span><span class="kv-v">20%</span></div>
+      <div class="kv"><span class="kv-k">Other Topics</span><span class="kv-v">15%</span></div>
+    </div>
+  </div>
+</div></div>`; }
+
+function initChart() {
+    const ctx=document.getElementById('lossChart');
+    if(!ctx) return;
+    if(chartInst) chartInst.destroy();
+    chartInst=new Chart(ctx,{
+        type:'line',
+        data:{
+            labels:data.trainingCurve.epochs,
+            datasets:[
+                { label:'Loss', data:data.trainingCurve.loss, borderColor:'#1a1714', backgroundColor:'rgba(26,23,20,.07)', tension:.4, fill:true, yAxisID:'y', borderWidth:1.8, pointRadius:3, pointBackgroundColor:'#1a1714' },
+                { label:'Learning Rate (e-5)', data:data.trainingCurve.learningRate.map(lr=>lr*1e5), borderColor:'#bf7b37', backgroundColor:'rgba(191,123,55,.08)', tension:.4, fill:true, yAxisID:'y1', borderWidth:1.8, pointRadius:3, pointBackgroundColor:'#bf7b37' }
+            ]
+        },
+        options:{
+            responsive:true, maintainAspectRatio:false,
+            interaction:{mode:'index',intersect:false},
+            plugins:{legend:{position:'top',labels:{color:'#6a6460',font:{family:'DM Sans',size:12}}}},
+            scales:{
+                y:{type:'linear',display:true,position:'left',title:{display:true,text:'Loss',color:'#9b9590',font:{size:11}},grid:{color:'rgba(0,0,0,.05)'},ticks:{color:'#9b9590',font:{size:11}}},
+                y1:{type:'linear',display:true,position:'right',title:{display:true,text:'LR (e-5)',color:'#9b9590',font:{size:11}},grid:{drawOnChartArea:false},ticks:{color:'#9b9590',font:{size:11}}},
+                x:{grid:{color:'rgba(0,0,0,.05)'},ticks:{color:'#9b9590',font:{size:11}}}
+            }
+        }
+    });
+}
+
+function renderProjects() { return `
+<div class="page-view"><div class="page-inner">
+  <div class="page-hd"><h1 class="page-title">Project Milestones</h1><p class="page-sub">项目历程与关键里程碑</p></div>
+  ${data.projects.map(p=>`
+  <div class="proj-card">
+    <div class="proj-hd">
+      <div class="proj-name">${p.title}</div>
+      <span class="pill ${p.status==='已上线'?'green':p.status==='开发中'?'amber':'green'}">${p.status}</span>
+    </div>
+    <p class="proj-desc">${p.description}</p>
+    <div class="tags">${p.keywords.map(k=>`<span class="tag">${k}</span>`).join('')}</div>
+  </div>`).join('')}
+</div></div>`; }
+
+document.addEventListener('DOMContentLoaded',()=>switchView('chat'));
+</script>
+</body>
+</html>
