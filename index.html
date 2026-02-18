@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Logistics AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style>
+        * {
+            font-family: 'Roboto', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            /* Google Material Design 3 Colors */
+            --md3-primary: #1A73E8;
+            --md3-primary-light: #4285F4;
+            --md3-primary-dark: #0D47A1;
+            --md3-surface: #FFFFFF;
+            --md3-surface-variant: #F2F2F2;
+            --md3-background: #F8F9FA;
+            --md3-on-surface: #202124;
+            --md3-on-surface-variant: #5F6368;
+            --md3-outline: #DADCE0;
+            --md3-outline-variant: #E8EAED;
+            --md3-error: #EA4335;
+            --md3-success: #34A853;
+            --md3-warning: #FBBC05;
+            
+            /* Elevation Shadows */
+            --md3-elevation-1: 0 1px 3px rgba(60, 64, 67, 0.1), 0 1px 2px rgba(60, 64, 67, 0.06);
+            --md3-elevation-2: 0 2px 4px rgba(60, 64, 67, 0.1), 0 1px 2px rgba(60, 64, 67, 0.08);
+            --md3-elevation-3: 0 4px 6px rgba(60, 64, 67, 0.1), 0 2px 4px rgba(60, 64, 67, 0.08);
+            --md3-elevation-4: 0 8px 10px rgba(60, 64, 67, 0.1), 0 4px 6px rgba(60, 64, 67, 0.1);
+            --md3-elevation-5: 0 12px 16px rgba(60, 64, 67, 0.1), 0 6px 8px rgba(60, 64, 67, 0.1);
+        }
+        
+        body {
+            background-color: var(--md3-background);
+            color: var(--md3-on-surface);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--md3-surface);
+            border-right: 1px solid var(--md3-outline-variant);
+            width: 280px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar-header {
+            padding: 24px 20px 16px;
+            border-bottom: 1px solid var(--md3-outline-variant);
+        }
+        
+        .logo {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--md3-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 12px;
+        }
+        
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--md3-outline-variant);
+        }
+        
+        /* Navigation Items */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--md3-on-surface-variant);
+            text-decoration: none;
+            margin-bottom: 4px;
+        }
+        
+        .nav-item:hover {
+            background-color: rgba(26, 115, 232, 0.08);
+            color: var(--md3-primary);
+        }
+        
+        .nav-item.active {
+            background-color: rgba(26, 115, 232, 0.12);
+            color: var(--md3-primary);
+        }
+        
+        .nav-item .material-symbols-rounded {
+            font-size: 20px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Cards */
+        .md3-card {
+            background-color: var(--md3-surface);
+            border-radius: 16px;
+            box-shadow: var(--md3-elevation-1);
+            padding: 24px;
+            transition: box-shadow 0.2s ease;
+        }
+        
+        .md3-card:hover {
+            box-shadow: var(--md3-elevation-2);
+        }
+        
+        /* Buttons */
+        .md3-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 9999px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            border: none;
+            outline: none;
+        }
+        
+        .md3-btn-primary {
+            background-color: var(--md3-primary);
+            color: white;
+        }
+        
+        .md3-btn-primary:hover {
+            background-color: var(--md3-primary-light);
+            box-shadow: var(--md3-elevation-2);
+        }
+        
+        .md3-btn-secondary {
+            background-color: var(--md3-surface-variant);
+            color: var(--md3-on-surface);
+        }
+        
+        .md3-btn-secondary:hover {
+            background-color: rgba(60, 64, 67, 0.08);
+        }
+        
+        .md3-btn-outline {
+            background-color: transparent;
+            color: var(--md3-on-surface-variant);
+            border: 1px solid var(--md3-outline);
+        }
+        
+        .md3-btn-outline:hover {
+            background-color: rgba(60, 64, 67, 0.04);
+            border-color: var(--md3-outline-variant);
+        }
+        
+        /* Input Fields */
+        .md3-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--md3-outline);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background-color: var(--md3-surface);
+            color: var(--md3-on-surface);
+        }
+        
+        .md3-input:focus {
+            outline: none;
+            border-color: var(--md3-primary);
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+        }
+        
+        /* Chat Bubbles */
+        .chat-bubble {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            margin-bottom: 12px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .chat-bubble-user {
+            background-color: var(--md3-primary);
+            color: white;
+            border-radius: 18px 4px 18px 18px;
+            align-self: flex-end;
+        }
+        
+        .chat-bubble-ai {
+            background-color: var(--md3-surface);
+            color: var(--md3-on-surface);
+            border: 1px solid var(--md3-outline-variant);
+            border-radius: 4px 18px 18px 18px;
+            align-self: flex-start;
+        }
+        
+        /* Typography */
+        .display-large {
+            font-size: 32px;
+            font-weight: 300;
+            line-height: 40px;
+        }
+        
+        .display-medium {
+            font-size: 28px;
+            font-weight: 400;
+            line-height: 36px;
+        }
+        
+        .display-small {
+            font-size: 24px;
+            font-weight: 400;
+            line-height: 32px;
+        }
+        
+        .headline-large {
+            font-size: 20px;
+            font-weight: 400;
+            line-height: 28px;
+        }
+        
+        .headline-medium {
+            font-size: 18px;
+            font-weight: 500;
+            line-height: 24px;
+        }
+        
+        .headline-small {
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 24px;
+        }
+        
+        .body-large {
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 24px;
+        }
+        
+        .body-medium {
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 20px;
+        }
+        
+        .body-small {
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 16px;
+        }
+        
+        .label-large {
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .label-medium {
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .label-small {
+            font-size: 11px;
+            font-weight: 500;
+            line-height: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Ripple Effect */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            transform: scale(0);
+            animation: ripple-animation 0.6s linear;
+            pointer-events: none;
+        }
+        
+        @keyframes ripple-animation {
+            to { transform: scale(4); opacity: 0; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Scrollbar */
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: var(--md3-surface-variant);
+            border-radius: 3px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: var(--md3-outline);
+            border-radius: 3px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: var(--md3-outline-variant);
+        }
+        
+        /* Badge */
+        .md3-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .md3-badge-success {
+            background-color: rgba(52, 168, 83, 0.1);
+            color: var(--md3-success);
+        }
+        
+        .md3-badge-warning {
+            background-color: rgba(251, 188, 5, 0.1);
+            color: var(--md3-warning);
+        }
+        
+        .md3-badge-info {
+            background-color: rgba(26, 115, 232, 0.1);
+            color: var(--md3-primary);
+        }
+        
+        /* Quick Action Cards */
+        .quick-action-card {
+            background-color: var(--md3-surface);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--md3-elevation-1);
+        }
+        
+        .quick-action-card:hover {
+            box-shadow: var(--md3-elevation-2);
+            transform: translateY(-2px);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="material-symbols-rounded">medical_services</span>
+                <span>Medical Logistics AI</span>
+            </div>
+        </div>
+        
+        <div class="sidebar-content scrollbar-thin">
+            <button onclick="newChat()" class="md3-btn md3-btn-outline w-full mb-8">
+                <span class="material-symbols-rounded">add</span>
+                <span>New chat</span>
+            </button>
+            
+            <nav>
+                <button onclick="switchView('chat')" id="nav-chat" class="nav-item active">
+                    <span class="material-symbols-rounded">chat</span>
+                    <span class="body-medium">Chat</span>
+                </button>
+                <button onclick="switchView('overview')" id="nav-overview" class="nav-item">
+                    <span class="material-symbols-rounded">dashboard</span>
+                    <span class="body-medium">Overview</span>
+                </button>
+                <button onclick="switchView('training')" id="nav-training" class="nav-item">
+                    <span class="material-symbols-rounded">show_chart</span>
+                    <span class="body-medium">Training</span>
+                </button>
+                <button onclick="switchView('projects')" id="nav-projects" class="nav-item">
+                    <span class="material-symbols-rounded">folder</span>
+                    <span class="body-medium">Projects</span>
+                </button>
+            </nav>
+        </div>
+        
+        <div class="sidebar-footer">
+            <div class="mb-4">
+                <div class="body-small text-md3-on-surface-variant mb-2">Model Mode</div>
+                <button id="modelModeBtn" onclick="toggleModelMode()" class="md3-btn md3-btn-outline w-full mb-3">
+                    <span class="material-symbols-rounded">radio_button_unchecked</span>
+                    <span>Demo Mode</span>
+                </button>
+                <button onclick="openRealModel()" class="md3-btn md3-btn-primary w-full">
+                    <span class="material-symbols-rounded">open_in_new</span>
+                    <span>Open Real Model</span>
+                </button>
+                <div class="body-small text-md3-on-surface-variant mt-2" style="font-size: 11px; line-height: 1.4;">
+                    <span class="material-symbols-rounded" style="font-size: 14px; vertical-align: middle;">info</span>
+                    Demo Mode uses preset responses. Click "Open Real Model" to use the trained model on ModelScope.
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3 p-3 rounded-12 bg-md3-surface-variant">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-full flex items-center justify-center text-white font-medium">
+                    ML
+                </div>
+                <div>
+                    <div class="body-medium font-medium">AI Developer</div>
+                    <div class="body-small text-md3-on-surface-variant">Product Manager</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <div id="mainContent" class="flex-1 p-8">
+            <!-- Content will be rendered here -->
+        </div>
+    </main>
+    
+    <script>
+        const siteData = {
+            config: {
+                useRealModel: false,
+                modelScopeSpace: 'https://www.modelscope.cn/studios/Ethanspace/medical-logistics-ai',
+                modelScopeApi: 'https://www.modelscope.cn/api/v1/studios/Ethanspace/medical-logistics-ai/gradio',
+                systemPrompt: '你是智能医疗物流助手，可以为用户介绍智能物流系统、产品优势、售后服务等内容。'
+            },
+            metrics: {
+                trainingData: 300,
+                epochs: 100,
+                finalLoss: 1.89,
+                gpuHours: 1.5,
+                accuracy: 92.5,
+                inferenceTime: 0.8
+            },
+            projects: [
+                {
+                    id: 1,
+                    title: "Medical Logistics AI Assistant",
+                    description: "基于Qwen2.5-0.5B-Instruct大模型，经过LoRA微调训练，专门用于医疗物流产品咨询与售后服务的智能助手。训练了300+条专业数据，100个epoch，最终Loss降至1.89。部署在ModelScope平台，免费对外提供服务。",
+                    keywords: ["Large Model", "LoRA", "Qwen", "Medical Logistics", "SFT", "ModelScope"],
+                    status: "已上线"
+                },
+                {
+                    id: 2,
+                    title: "Hospital Logistics Knowledge Base",
+                    description: "构建了包含300+条专业问答的医疗物流知识库，覆盖轨道物流、箱式物流、气动物流、物流机器人等产品的介绍、优势、售后等内容。数据经过清洗，移除品牌信息，确保合规使用。",
+                    keywords: ["Knowledge Base", "Data Annotation", "NLP", "Data Cleaning"],
+                    status: "已完成"
+                },
+                {
+                    id: 3,
+                    title: "Model Training Visualization",
+                    description: "实时监控和可视化大模型训练过程，包括Loss曲线、学习率调度、GPU利用率等关键指标，帮助优化训练策略。",
+                    keywords: ["Visualization", "Training Monitoring", "Matplotlib"],
+                    status: "开发中"
+                }
+            ],
+            trainingCurve: {
+                epochs: [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+                loss: [3.708, 3.521, 3.210, 2.987, 2.765, 2.543, 2.321, 2.100, 1.987, 1.923, 1.890],
+                learningRate: [5e-5, 4.8e-5, 4.2e-5, 3.5e-5, 2.8e-5, 2.1e-5, 1.5e-5, 1.0e-5, 6e-6, 3e-6, 1e-7]
+            },
+            chatResponses: {
+                "产品": "我们的核心产品包括：中型轨道物流传输系统、箱式物流传输系统、气动物流传输系统、物流机器人、垃圾污被服收集处理系统等，提供智慧物流全场景解决方案。轨道系统载重15kg，速度0.1-1m/s；箱式系统载重30-50kg，适合大件运输；气动系统速度5-8m/s，快速传输小件；机器人采用SLAM导航，无需改造环境。",
+                "有哪些产品": "我们的核心产品包括：中型轨道物流传输系统、箱式物流传输系统、气动物流传输系统、物流机器人、垃圾污被服收集处理系统等，提供智慧物流全场景解决方案。轨道系统载重15kg，速度0.1-1m/s；箱式系统载重30-50kg，适合大件运输；气动系统速度5-8m/s，快速传输小件；机器人采用SLAM导航，无需改造环境。",
+                "轨道物流": "中型轨道物流传输系统以收发工作站、传输小车、轨道、换轨器、控制软件等为核心，传输速度0.1-1m/s，载重可达15kg，适合输送输液袋、药品、耗材、检验标本、病历档案等。系统采用不锈钢材质，使用寿命长达20年以上，已服务超过500家医院，日均传输量可达10000次以上。",
+                "箱式物流": "箱式物流传输系统具有载重量大、复用率高的特点，载重可达30-50kg，周转箱可循环使用，适合输送输液包、手术包、餐食、被服等大件物品。系统设计容量为每小时500箱，可根据医院规模灵活配置，能耗比传统方式降低60%，占地节省40%。",
+                "气动物流": "气动物流传输系统速度快，传输速度可达5-8m/s，适合快速传输检验标本、紧急药品、血液制品等小件物品。管道采用不锈钢材质，直径110mm，单次传输时间仅需10-30秒，是急诊、ICU等科室的理想选择，已累计完成超过1000万次安全传输。",
+                "物流机器人": "物流机器人采用自然导航SLAM技术，无需改造医院环境，灵活调度，适合平疫结合的运输场景。单台机器人载重可达100kg，续航8小时，充电2小时，支持多机器人协同调度，效率提升300%，已在200+医院投入使用。",
+                "优势": "我们产品的核心优势包括：国家高新技术企业、专精特新企业、300+项知识产权、20年+使用寿命、全程数字化可追溯、平疫结合无人化运输、定制化解决方案。已服务500+医院，覆盖30个省份，市场占有率领先，日均处理物流量超过100万次。",
+                "技术优势": "我们产品的核心优势包括：国家高新技术企业、专精特新企业、300+项知识产权、20年+使用寿命、全程数字化可追溯、平疫结合无人化运输、定制化解决方案。已服务500+医院，覆盖30个省份，市场占有率领先，日均处理物流量超过100万次。",
+                "使用寿命": "我们的管道及投放门采用304不锈钢材质，使用寿命长达20年以上，适配医院每日高频次、高负荷使用场景。系统设计标准为每日20000次传输，经过1000万次循环测试，核心部件寿命可达25年，提供长期稳定的服务保障。",
+                "售后服务": "我们提供完善的售后服务体系，包括专业的安装调试、定期维护保养、快速响应的故障维修、系统升级优化、操作培训等全流程服务。全国设有30+服务中心，24小时热线，4小时现场响应，定期巡检，终身技术支持，确保系统稳定运行。",
+                "定制": "是的，我们深刻理解医院的临床流程与管理需求，能提供最贴合实际的专业定制化解决方案，根据不同医院的实际情况量身打造智能物流系统。拥有100+定制案例，支持模块化配置，灵活扩展，适配新旧院区改造，提供从规划到实施的全流程服务。",
+                "你好": "你好！我是智能医疗物流助手，可以为你介绍我们的智能物流系统、产品优势、售后服务等内容。我们提供轨道物流、箱式物流、气动物流、物流机器人等全场景解决方案，已服务500+医院。请问有什么可以帮你的吗？",
+                "您好": "你好！我是智能医疗物流助手，可以为你介绍我们的智能物流系统、产品优势、售后服务等内容。我们提供轨道物流、箱式物流、气动物流、物流机器人等全场景解决方案，已服务500+医院。请问有什么可以帮你的吗？"
+            },
+            quickQuestions: [
+                "有哪些产品？",
+                "技术优势是什么？",
+                "轨道物流介绍",
+                "物流机器人特点",
+                "售后服务内容"
+            ]
+        };
+
+        let currentView = 'chat';
+        let chart = null;
+        let chatHistory = [];
+
+        function newChat() {
+            chatHistory = [];
+            switchView('chat');
+        }
+
+        function addRippleEffect(e) {
+            const button = e.currentTarget;
+            const ripple = document.createElement('span');
+            const rect = button.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.classList.add('ripple');
+            
+            button.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        }
+
+        function renderChatView() {
+            if (chatHistory.length === 0) {
+                return `
+                    <div class="h-screen flex flex-col">
+                        <div class="flex-1 flex flex-col items-center justify-center p-8">
+                            <div class="text-center mb-12">
+                                <div class="text-8xl mb-8">✨</div>
+                                <h1 class="display-medium mb-4">Medical Logistics AI</h1>
+                                <p class="body-medium text-md3-on-surface-variant">智能医疗物流助手 · Product Manager Perspective</p>
+                            </div>
+                            
+                            <div class="grid md:grid-cols-3 gap-6 max-w-5xl w-full mb-12">
+                                ${siteData.quickQuestions.map((q) => `
+                                    <div onclick="quickAsk('${q}')" class="quick-action-card">
+                                        <div class="body-medium">${q}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            
+                            <div class="md3-card max-w-3xl w-full border-l-4 border-md3-warning">
+                                <div class="flex items-start gap-4">
+                                    <span class="material-symbols-rounded text-md3-warning">warning</span>
+                                    <div>
+                                        <h3 class="headline-small text-md3-warning mb-2">免责声明</h3>
+                                        <p class="body-small text-md3-on-surface-variant">
+                                            本项目为教学演示目的，所有数据为模拟数据，仅供学习交流使用，不构成任何商业建议。训练数据来自公开信息整理，如有侵权请联系删除。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-8 border-t border-md3-outline-variant">
+                            <div class="max-w-4xl mx-auto">
+                                <div class="md3-card p-4">
+                                    <div class="flex items-end gap-4">
+                                        <textarea
+                                            id="chatInput"
+                                            placeholder="发送消息..."
+                                            class="md3-input flex-1 bg-transparent outline-none resize-none max-h-64"
+                                            rows="1"
+                                            onkeydown="handleKeyDown(event)"
+                                            oninput="autoResize(this)"
+                                        ></textarea>
+                                        <button onclick="sendMessage()" class="md3-btn md3-btn-primary" style="height: 44px;">
+                                            <span class="material-symbols-rounded">send</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <p class="body-small text-md3-on-surface-variant text-center mt-4">
+                                    Medical Logistics AI can make mistakes. Please verify important information.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="h-screen flex flex-col">
+                        <div id="chatMessages" class="flex-1 overflow-y-auto p-8 scrollbar-thin">
+                            <div class="max-w-4xl mx-auto space-y-6">
+                                ${chatHistory.map((msg, idx) => `
+                                    <div class="flex gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}">
+                                        ${msg.role === 'assistant' ? `
+                                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-full flex items-center justify-center flex-shrink-0 text-white font-medium">
+                                                ML
+                                            </div>
+                                        ` : ''}
+                                        <div class="${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'}">
+                                            <p class="body-medium whitespace-pre-wrap">${msg.content}</p>
+                                        </div>
+                                        ${msg.role === 'user' ? `
+                                            <div class="w-10 h-10 bg-md3-surface-variant rounded-full flex items-center justify-center flex-shrink-0 font-medium text-md3-on-surface-variant">
+                                                我
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="p-8 border-t border-md3-outline-variant">
+                            <div class="max-w-4xl mx-auto">
+                                <div class="md3-card p-4">
+                                    <div class="flex items-end gap-4">
+                                        <textarea
+                                            id="chatInput"
+                                            placeholder="发送消息..."
+                                            class="md3-input flex-1 bg-transparent outline-none resize-none max-h-64"
+                                            rows="1"
+                                            onkeydown="handleKeyDown(event)"
+                                            oninput="autoResize(this)"
+                                        ></textarea>
+                                        <button onclick="sendMessage()" class="md3-btn md3-btn-primary" style="height: 44px;">
+                                            <span class="material-symbols-rounded">send</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderOverviewView() {
+            return `
+                <div class="max-w-6xl mx-auto">
+                    <div class="mb-12">
+                        <h1 class="display-large mb-4">Overview</h1>
+                        <p class="body-large text-md3-on-surface-variant">从0到1打造医疗物流AI助手</p>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                        <div class="md3-card">
+                            <div class="display-medium mb-2">${siteData.metrics.trainingData}</div>
+                            <div class="body-medium text-md3-on-surface-variant">Training Data</div>
+                        </div>
+                        <div class="md3-card">
+                            <div class="display-medium mb-2">${siteData.metrics.epochs}</div>
+                            <div class="body-medium text-md3-on-surface-variant">Training Epochs</div>
+                        </div>
+                        <div class="md3-card">
+                            <div class="display-medium mb-2">${siteData.metrics.finalLoss}</div>
+                            <div class="body-medium text-md3-on-surface-variant">Final Loss</div>
+                        </div>
+                        <div class="md3-card">
+                            <div class="display-medium mb-2">${siteData.metrics.gpuHours}</div>
+                            <div class="body-medium text-md3-on-surface-variant">GPU Hours</div>
+                        </div>
+                        <div class="md3-card">
+                            <div class="display-medium mb-2">${siteData.metrics.accuracy}%</div>
+                            <div class="body-medium text-md3-on-surface-variant">Accuracy</div>
+                        </div>
+                        <div class="md3-card">
+                            <div class="display-medium mb-2">${siteData.metrics.inferenceTime}s</div>
+                            <div class="body-medium text-md3-on-surface-variant">Inference Time</div>
+                        </div>
+                    </div>
+                    
+                    <div class="md3-card mb-8">
+                        <h2 class="headline-medium mb-6">Project Status</h2>
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-3 h-3 bg-md3-success rounded-full animate-pulse"></div>
+                            <span class="body-medium text-md3-success">已上线</span>
+                        </div>
+                        <p class="body-medium text-md3-on-surface-variant">
+                            基于Qwen2.5-7B-Instruct大模型，经过LoRA微调训练，专门用于医疗物流产品咨询与售后服务的智能助手。
+                        </p>
+                    </div>
+                    
+                    <div class="md3-card border-l-4 border-md3-warning">
+                        <div class="flex items-start gap-4">
+                            <span class="material-symbols-rounded text-md3-warning">warning</span>
+                            <div>
+                                <h3 class="headline-small text-md3-warning mb-2">免责声明</h3>
+                                <p class="body-small text-md3-on-surface-variant">
+                                    本项目为教学演示目的，所有数据为模拟数据，仅供学习交流使用，不构成任何商业建议。训练数据来自公开信息整理，如有侵权请联系删除。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTrainingView() {
+            return `
+                <div class="max-w-6xl mx-auto">
+                    <div class="mb-12">
+                        <h1 class="display-large mb-4">Training Data</h1>
+                        <p class="body-large text-md3-on-surface-variant">Loss曲线与学习率调度</p>
+                    </div>
+                    
+                    <div class="md3-card mb-12">
+                        <div class="h-96">
+                            <canvas id="lossChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="md3-card">
+                            <h3 class="headline-small mb-6">Model Architecture</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between">
+                                    <span class="body-medium text-md3-on-surface-variant">Base Model</span>
+                                    <span class="body-medium font-medium">Qwen2.5-0.5B-Instruct</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="body-medium text-md3-on-surface-variant">Fine-tuning</span>
+                                    <span class="body-medium font-medium">LoRA</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="body-medium text-md3-on-surface-variant">Rank</span>
+                                    <span class="body-medium font-medium">8</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="body-medium text-md3-on-surface-variant">Alpha</span>
+                                    <span class="body-medium font-medium">16</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md3-card">
+                            <h3 class="headline-small mb-6">Training Configuration</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between">
+                                    <span class="body-medium text-md3-on-surface-variant">Batch Size</span>
+                                    <span class="body-medium font-medium">4</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="body-medium text-md3-on-surface-variant">Gradient Accumulation</span>
+                                    <span class="body-medium font-medium">4</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="body-medium text-md3-on-surface-variant">Learning Rate</span>
+                                    <span class="body-medium font-medium">5e-5</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="body-medium text-md3-on-surface-variant">Optimizer</span>
+                                    <span class="body-medium font-medium">AdamW</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md3-card">
+                            <h3 class="headline-small mb-6">Data Distribution</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between">
+                                    <span class="body-medium text-md3-on-surface-variant">产品介绍</span>
+                                    <span class="body-medium font-medium">80条</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="body-medium text-md3-on-surface-variant">技术优势</span>
+                                    <span class="body-medium font-medium">70条</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="body-medium text-md3-on-surface-variant">售后服务</span>
+                                    <span class="body-medium font-medium">80条</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="body-medium text-md3-on-surface-variant">其他</span>
+                                    <span class="body-medium font-medium">70条</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProjectsView() {
+            return `
+                <div class="max-w-6xl mx-auto">
+                    <div class="mb-12">
+                        <h1 class="display-large mb-4">Projects</h1>
+                        <p class="body-large text-md3-on-surface-variant">产品经理视角的项目演进</p>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        ${siteData.projects.map((project) => `
+                            <div class="md3-card">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div>
+                                        <div class="flex items-center gap-4 mb-3">
+                                            <h3 class="headline-medium">${project.title}</h3>
+                                            <span class="md3-badge ${project.status === '已上线' ? 'md3-badge-success' : project.status === '已完成' ? 'md3-badge-info' : 'md3-badge-warning'}">
+                                                ${project.status}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="body-medium text-md3-on-surface-variant mb-6">${project.description}</p>
+                                <div class="flex flex-wrap gap-3">
+                                    ${project.keywords.map(kw => `
+                                        <span class="md3-badge md3-badge-info">
+                                            ${kw}
+                                        </span>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function switchView(view) {
+            currentView = view;
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById('nav-' + view).classList.add('active');
+            
+            const mainContent = document.getElementById('mainContent');
+            
+            switch(view) {
+                case 'chat':
+                    mainContent.innerHTML = renderChatView();
+                    break;
+                case 'overview':
+                    mainContent.innerHTML = renderOverviewView();
+                    break;
+                case 'training':
+                    mainContent.innerHTML = renderTrainingView();
+                    setTimeout(() => initChart(), 100);
+                    break;
+                case 'projects':
+                    mainContent.innerHTML = renderProjectsView();
+                    break;
+            }
+        }
+
+        function quickAsk(question) {
+            switchView('chat');
+            setTimeout(() => {
+                const input = document.getElementById('chatInput');
+                if (input) {
+                    input.value = question;
+                    sendMessage();
+                }
+            }, 100);
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            if (!input) return;
+            
+            const message = input.value.trim();
+            if (!message) return;
+            
+            chatHistory.push({ role: 'user', content: message });
+            chatHistory.push({ role: 'assistant', content: '', isTyping: true });
+            
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = renderChatView();
+            
+            if (siteData.config.useRealModel) {
+                try {
+                    const response = await callModelScopeModel(message);
+                    chatHistory[chatHistory.length - 1] = { role: 'assistant', content: response };
+                } catch (error) {
+                    chatHistory[chatHistory.length - 1] = { role: 'assistant', content: '抱歉，模型调用失败：' + error.message + '\n\n已自动切换到演示模式。' };
+                    siteData.config.useRealModel = false;
+                    updateModelModeButton();
+                }
+            } else {
+                setTimeout(() => {
+                    let response = "感谢你的提问！我可以为你介绍我们的智能物流产品、技术优势和售后服务。试试问：有哪些产品？技术优势是什么？";
+                    let maxMatchLength = 0;
+                    let bestMatch = null;
+                    
+                    for (const key in siteData.chatResponses) {
+                        if (message.includes(key) && key.length > maxMatchLength) {
+                            maxMatchLength = key.length;
+                            bestMatch = key;
+                        }
+                    }
+                    
+                    if (bestMatch) {
+                        response = siteData.chatResponses[bestMatch];
+                    }
+                    
+                    chatHistory[chatHistory.length - 1] = { role: 'assistant', content: response };
+                    mainContent.innerHTML = renderChatView();
+                    
+                    const chatMessages = document.getElementById('chatMessages');
+                    if (chatMessages) {
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }
+                }, 1000);
+            }
+            
+            mainContent.innerHTML = renderChatView();
+            const chatMessages = document.getElementById('chatMessages');
+            if (chatMessages) {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            input.value = '';
+            input.style.height = 'auto';
+        }
+
+        async function callModelScopeModel(message) {
+            const apiUrl = siteData.config.modelScopeApi + '/call/predict';
+            
+            const messages = [];
+            for (const msg of chatHistory) {
+                if (msg.role === 'user' && msg.content) {
+                    messages.push([msg.content, null]);
+                } else if (msg.role === 'assistant' && msg.content && !msg.isTyping) {
+                    if (messages.length > 0) {
+                        messages[messages.length - 1][1] = msg.content;
+                    }
+                }
+            }
+            
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    data: [message, messages]
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('HTTP ' + response.status);
+            }
+            
+            const result = await response.json();
+            return result.data;
+        }
+
+        function toggleModelMode() {
+            siteData.config.useRealModel = !siteData.config.useRealModel;
+            updateModelModeButton();
+        }
+
+        function updateModelModeButton() {
+            const btn = document.getElementById('modelModeBtn');
+            if (btn) {
+                btn.innerHTML = siteData.config.useRealModel ? 
+                    '<span class="material-symbols-rounded">radio_button_checked</span><span>Real Model</span>' : 
+                    '<span class="material-symbols-rounded">radio_button_unchecked</span><span>Demo Mode</span>';
+                
+                if (siteData.config.useRealModel) {
+                    btn.classList.remove('md3-btn-outline');
+                    btn.classList.add('md3-btn-primary');
+                } else {
+                    btn.classList.remove('md3-btn-primary');
+                    btn.classList.add('md3-btn-outline');
+                }
+            }
+        }
+
+        function openRealModel() {
+            window.open(siteData.config.modelScopeSpace, '_blank');
+        }
+
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 256) + 'px';
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('lossChart');
+            if (!ctx) return;
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: siteData.trainingCurve.epochs,
+                    datasets: [
+                        {
+                            label: 'Loss',
+                            data: siteData.trainingCurve.loss,
+                            borderColor: '#1A73E8',
+                            backgroundColor: 'rgba(26, 115, 232, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Learning Rate (e-5)',
+                            data: siteData.trainingCurve.learningRate.map(lr => lr * 1e5),
+                            borderColor: '#34A853',
+                            backgroundColor: 'rgba(52, 168, 83, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Training Loss and Learning Rate'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Loss'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Learning Rate (e-5)'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            switchView('chat');
+        });
+    </script>
+</body>
+</html>
